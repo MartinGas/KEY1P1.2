@@ -40,12 +40,12 @@ public class Position {
 		
 	}
 	
-	/** x differences between two different possitions **/
+	/** x differences between two different positions **/
 	public int getDiffX(Position dx){
 		int diff = this.x - dx.x;
 	}
 	
-	/** y differences between two different possitions **/
+	/** y differences between two different positions **/
 	public int getDiffY(Position dy){
 		int diff = this.y - dy.y;
 	}
