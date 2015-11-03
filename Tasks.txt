@@ -18,7 +18,13 @@ Changes to MHandler:
 getCloseRow (check)
 isCOlumnFilled (check)
 isRowFilled (check)
-Implement new methods into Board class 
+Implement new methods into Board class: 
+Please add the following:
+clearRow
+moveRow
+getCloseRow/Col
+isCol/RowFilled
+	Note: You might want to use the methods implemented in MatrixHandler => call them on MatrixHandler stored in Board
 
 
 -Meghun-

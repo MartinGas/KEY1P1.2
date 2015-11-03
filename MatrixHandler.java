@@ -22,7 +22,7 @@ public class MatrixHandler {
 	// Please rearrange the methods later and group them accordingly
 	/**
 	 * @param direc Which direction to look for the closest filled cell on the same row
-	 * @param position The cell coordinates which contain x and y
+	 * @param position The cell number (in position number format)
 	 * @return Index of column the closest filled cell is in or -1 if there are none (borders = restrictions)
 	 */
 	public int getCloseCol(Direction direc, int position)
@@ -106,14 +106,13 @@ public class MatrixHandler {
 	}
 	
 	/**
-	 * @param row Index of the row
+	 * @param index of row the line above will be moved to. Precondition: Row > 0
 	 * This method copies the row from above to one row below
 	 */
 	public void moveRow(int row) {
+		assert (row > 0);
 		for (int j=0; j<this.getWidth(); j++) {
-			if (row>0) {
 				mStoreArray[j][row] = mStoreArray[j][row-1];	
-			}
 		}
 	}
 
