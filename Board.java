@@ -293,7 +293,7 @@ public class Board {
 	
 	public boolean equals (Board compare)
 	{
-		return (this.mMatrix.equals (compare.mMatrix));	
+		return (this.mMatrix.equals(compare.mMatrix));	
 	}
 	
 	public boolean isEmpty ()

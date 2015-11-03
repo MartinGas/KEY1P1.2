@@ -15,10 +15,10 @@ rowMover
 
 -Felix-
 Changes to MHandler:
-getCloseRow
-isCOlumnFilled
-isRowFilled
-Implement new methods into Board class
+getCloseRow (check)
+isCOlumnFilled (check)
+isRowFilled (check)
+Implement new methods into Board class 
 
 
 -Meghun-
@@ -29,3 +29,4 @@ getDiffX
 getDiffY
 
 Martin will assist who ever needs help (he won't be writing any code!).
+
