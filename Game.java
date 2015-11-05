@@ -29,8 +29,34 @@ public class Game
 	/**@param direc Takes the direction game wants to move the pent 
 	 * @return True if move is valid, false if not
 	 */
-	public boolean checkOverlap(Direction direc)
-	{
+	public boolean checkMove(Direction direc)
+	{	
+		//Moving to the right
+		if (direc == Direction.RIGHT)
+		{
+			//Move the piece in the appropiate direction
+			pentUsed.move(direc);
+			//Get the int position of the Pent after its been moved
+			int rPos = pentUsed.getPosNum();
+				if (pentFits(pentUsed, rPos))
+				{
+					return true;
+				}
+				return false;
+		}
+		//Moving to the left
+		if (direc == Direction.LEFT)
+		{
+			//Move the piece in the appropiate direction
+			pentUsed.move(direc);
+			//Get the int position of the Pent after its been moved
+			int lPos = pentUsed.getPosNum();
+				if (pentFits(pentUsed, lPos))
+				{
+					return true;
+				}
+				return false;
+		}
 		return false;
 	}
 	
@@ -39,7 +65,20 @@ public class Game
 	 */
 	public boolean checkRotate(Direction direc)
 	{
-		return true;
+		if (direc == Direction.UP)
+		{
+			//Rotate the cloned pent now clockwise
+			Pentomino pentClone = pentUsed.clone();
+			pentClone.turn();
+			int pos = pentUsed.smartRotate();
+			//Check if this rotated pent can fit
+			if (pentFits(pentClone, pos)
+				{
+					return true;
+				}
+				return false;
+		}
+		return false;
 	}
 	
 	/** @return True if game over, else false
@@ -47,7 +86,26 @@ public class Game
 	 */
 	public boolean gameOverChecker()
 	{
-		return false;
+		//This method should return the cell where the left top of the petomino should be placed when it appears on the board
+		int pos = pentUsed.getPosNum();
+		//Checks if the pentomino can even be placed
+		if (pentFits(pentUsed, pos))
+		{
+			return false;
+		} else 
+		{
+			//Checks if rotated cloned pent can be placed
+			//Maybe dont clone and not have to rotate again when placing the pent?
+			Pentomino pentClone = pentUsed.clone();
+			pentClone.turn();
+			int newPos = pentClone.smartRotate();
+			if (pentFits(pentClone, newPos))
+			{
+				return false;
+			}
+			return true;
+		}
+		return true;
 	}
 	
 	//Modifying Methods
@@ -69,13 +127,13 @@ public class Game
 		
 	}
 	
-	/**@param direc indicates the direction the pentomino should move
+	/**@param direc indicates the direction the pentomino should turn
 	 * @return void
 	 * Turns the block in a direction
 	 */
 	private void turn(Direction direc)
 	{
-		
+		//I think this method in no longer needed, the pent can only turn in 1 direction and .rotate accomplishes this
 	}
 	
 	/**@return void
@@ -113,8 +171,54 @@ public class Game
 		
 	}
 	
+	public int getRows()
+	{
+		int row = board.getHeight();
+		return row;
+	}
 	
+	public int getColumns()
+	{
+		int column = board.getWidth();
+		return column;
+	}
 	
+	/**@param int Takes left top cell of the matrix the pentomino is in (not the left top cell of the pentomino) as an int
+	 * @return new postion of left top after 'smart' rotating
+	 */
+	public int smartRotate()
+	{
+		//Get Pent Position before turning
+		int pos = pentUsed.getPosNum();
+		int moveLeft = 0;
+		int moveUp = 0;
+		//Get x-coordinate of the Pentomino
+		int xCoor = pentUsed.getX();					
+		int xCoorMax = board.getColumns();
+			
+		int yCoor = pentUsed.getY();
+		int yCoorMax = board.getRows();
+		//How many columns are to the right
+		int columnCounter = xCoorMax-xCoor;
+		//How may rows are there to the bottom of the board
+		int rowCounter = yCoorMax-yCoor;
+		
+		//How many times should we move the pent to the left
+		if ((pentUsed.getHeight() - 1 - columnCounter)>0)
+		{
+			int moveLeft = (pentUsed.getHeight() - 1) - columnCounter;
+		}
+		
+		//How many times should we move the pent up
+		if ((pentUsed.getWidth() - 1 - rowCounter)>0)
+		{
+			int moveUp = (pentUsed.getWidth() - 1) - rowCounter;
+		}
+		//Get new position that adjust for overlap
+		//Perhaps a method that can allow the (x,y) of position objects to be changed and a method that can convert a position back to an int would be better suited 
+		int newPos = pos - moveUp - field.getHeight()*moveLeft
+		return newPos;
+	}
 	
 	//Contains a Board
 	private Board field;
