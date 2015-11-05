@@ -17,6 +17,35 @@ public class MatrixHandler {
 			}
 		}
 	}
+	//Added for Project 1.2
+	//Please rearrange the methods later and group them accordingly
+	/**
+	 * @param direc Which direction to look for the closest filled cell on the same row
+	 * @return Position number the closest filled cell
+	 */
+	public int getCloseRow(Direction direc)
+	{
+	
+	}
+	
+	/**
+	 * @param column Index of column
+	 * @return True if column is completely filled
+	 */
+	public boolean isColumnFilled(int column)
+	{
+		
+	}
+	
+	/**
+	 * @param row Index of row
+	 * @return True if row is completely filled
+	 */
+	public boolean isRowFilled(int row)
+	{
+		
+	}
+	//End for Added for Project 1.2
 	public int getWidth() {
 		return mStoreArray.length;
 	}

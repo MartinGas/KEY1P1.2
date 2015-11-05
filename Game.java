@@ -30,7 +30,28 @@ public class Game
 	 * @return True if move is valid, false if not
 	 */
 	public boolean checkOverlap(Direction direc)
-	{
+	{	
+		//Get the x,y coordinate of the Pent (method still needs to be written in Coord class)
+		Coord position = pentUsed.getCoor();		//Convert x,y to a int (method still needs to be written)
+		int pos = getPosNum(x,y);
+		//Moving to the right
+		int rPos = pos + field.getHeight();
+		if (direc == Direction.RIGHT)
+		{
+			if (pentFits(pentUsed, rPos))
+			{
+				return true;
+			}
+		}
+		//Moving to the left
+		int lPos = pos - field.getHeight();
+		if (direc == Direction.LEFT)
+		{
+			if (pentFits(pentUsed, lPos))
+			{
+				return true;
+			}
+		}
 		return false;
 	}
 	
@@ -39,13 +60,80 @@ public class Game
 	 */
 	public boolean checkRotate(Direction direc)
 	{
-		return true;
+		if (direc == Direction.UP)
+		{
+			//Get x-coordinate of the Pentomino
+			int xCoor = pentUsed.getX();					
+			int xCoorMax = board.getColumns();
+			
+			int yCoor = pentUsed.getY();
+			int yCoorMax = board.getRows();
+			//How many columns are to the right
+			int columnCounter = xCoorMax-xCoor;
+			//How may rows are there to the bottom of the board
+			int rowCounter = yCoorMax-yCoor
+			
+			//How many times should we move the pent to the left
+			if ((pentUsed.getHeight() - 1 - columnCounter)>0)
+			{
+				int moveLeft = (pentUsed.getHeight() - 1) - columnCounter;
+			}else
+			{ 
+				int moveleft = 0;
+			}
+			if ((pentUsed.getWidth() - 1 - rowCounter)>0)
+			{
+			int moveUp = (pentUsed.getWidth() - 1) - rowCounter;
+			}else 
+			{
+				int moveUp = 0;
+			}
+			//Rotate the pent now clockwise
+			pentUsed.Rotate();
+			//Where is the left-top of this rotated pent?
+			pentUsed.getCoor();							
+			//Converting x,y to a pos and also subtracting moveLeft from x
+			int pos = getPosNum(x-moveLeft,y+moveUp);
+			//Check if this rotated pent can fit
+			if (pentFits(pentUsed, pos)
+				{
+					return true
+				}
+		}
+		return false
 	}
 	
 	/** @return True if game over, else false
 	 * If any overlap, game over
 	 */
 	public boolean gameOverChecker()
+	{
+		//Get the x,y coordinate of the Pent (method still needs to be written in Coord class)
+		Coord position = pentUsed.getCoor();
+		//This method should return the cell where the left top of the petomino should be placed when it appears on the board
+		int pos = getInitialPostion();
+		//Checks if the pentomino can even be placed
+		if (pentFits(pentUsed, pos))
+		{
+			return true;
+		} else 
+		{
+			//Checks if rotated pent can be placed
+			pentUsed.Rotate();
+			if (pentFits(pentUsed, pos))
+			{
+				return true;
+			}
+			return false
+		}
+		return false;
+	}
+	//Check if pentomino in its current position can fit (is this even necessary?)
+	int currentPos = getPosNum(x,y);
+	if (pentFits(pentUsed, currentPos))
+	{
+		return true;
+	} else
 	{
 		return false;
 	}
@@ -69,7 +157,7 @@ public class Game
 		
 	}
 	
-	/**@param direc indicates the direction the pentomino should move
+	/**@param direc indicates the direction the pentomino should turn
 	 * @return void
 	 * Turns the block in a direction
 	 */
@@ -113,6 +201,17 @@ public class Game
 		
 	}
 	
+	public int getRows()
+	{
+		int row = board.getHeight();
+		return row;
+	}
+	
+	public int getColumns()
+	{
+		int column = board.getWidth();
+		return column;
+	}
 	
 	
 	
