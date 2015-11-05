@@ -1,12 +1,13 @@
 public class Position {
 	
-	//Constructor
-	/** @param posNum gives position number that indicates a postion in postion number formats
-	* @param rows the number of roms in the board
-	* this constructour looks for the x and y using the rows and posNum**/
-	public Position(int posNum, int rows){
-		x = Math.ceil (posNum / rows) - 1;
-		y = (posNum%rows -1)
+	/**factory method for constructing Position using a position number
+	 * @param posNum position number to be converted to coordinates
+	 * @param rows rows of matrix posNum is referring to
+	 * @return Position object holding coordinates obtained by conversion
+	 */
+	public static Position fromPosNum (int posNum, int rows)
+	{
+		return new Position ((int)Math.ceil (posNum / rows) - 1, (int)(posNum - 1) % rows);
 	}
 	
 	/** @param x x coordinate of the position to be constructed
@@ -47,12 +48,12 @@ public class Position {
 	
 	/** @return x difference between parameter position and position stored in this object **/
 	public int getDiffX(Position dx){
-		int diff = this.x - dx.x;
+		 return (this.x - dx.x);
 	}
 	
 	/** @return y differences between parameter position and position stored in this object **/
 	public int getDiffY(Position dy){
-		int diff = this.y - dy.y;
+		return (this.y - dy.y);
 	}
 	
 	private int x;

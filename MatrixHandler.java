@@ -27,22 +27,23 @@ public class MatrixHandler {
 	 */
 	public int getCloseCol(Direction direc, int position)
 	{
-		assert (direc == LEFT || direc == RIGHT);
+		assert (direc == Direction.LEFT || direc == Direction.RIGHT);
 		Position pos = new Position(position, this.getHeight());
 		int x = pos.getX();
 		int y = pos.getY();
 		//Check columns to the left
-		if (direc == LEFT) {
+		if (direc == Direction.LEFT) {
 			for (int i=x; i>=0; i--) {
 				if (mStoreArray[i][y] != 0) return i;
 			}
 		}
 		//Check columns to the right
-		if (direc == RIGHT) {
+		if (direc == Direction.RIGHT) {
 			for (int i=x; i<this.getWidth(); i++) {
 				if (mStoreArray[i][y] != 0) return i;
 			}
 		}
+		return -1;
 	}
 
 	/**
@@ -52,22 +53,24 @@ public class MatrixHandler {
 	 */
 	public int getCloseRow(Direction direc, int position) 
 	{
-		assert(direc == UP || direc == DOWN);
+		assert(direc == Direction.UP || direc == Direction.DOWN);
 		Position pos = new Position(position, this.getHeight());
 		int x = pos.getX();
 		int y = pos.getY();
 		//Check rows above
-		if (direc == UP) {
+		if (direc == Direction.UP) {
 			for (int i=y; i>=0; i--) {
 				if (mStoreArray[x][i] != 0) return i;
 			}
 		}
 		//Check rows below
-		if (direc == DOWN) {
+		if (direc == Direction.DOWN) {
 			for (int i=y; i<this.getHeight(); i++) {
 				if (mStoreArray[x][i] != 0) return i;
 			}
 		}
+		
+		return -1;
 	}
 
 	/**
