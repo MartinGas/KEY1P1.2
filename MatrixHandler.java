@@ -71,31 +71,6 @@ public class MatrixHandler {
 	}
 
 	/**
-	 * @param column
-	 *            Index of column
-	 * @return True if column is completely filled
-	 */
-	public boolean isColumnFilled(int column) {
-		for (int i = 0; i < this.getHeight(); i++) {
-			if (mStoreArray[column][i] == 0)
-				return false;
-		}
-		return true;
-	}
-
-	/**
-	 * @param row Index of row
-	 * @return True if row is completely filled
-	 */
-	public boolean isRowFilled(int row) {
-		for (int i = 0; i < this.getWidth(); i++) {
-			if (mStoreArray[i][row] == 0)
-				return false;
-		}
-		return true;
-	}
-	
-	/**
 	 * @param row Index of the row
 	 * This method sets the value of each cell in the row to zero
 	 */
@@ -116,6 +91,27 @@ public class MatrixHandler {
 		}
 	}
 
+	/**
+	 * @param row The index of the row that should be checked
+	 * @return True if row is filled
+	 */
+	public boolean isRowFilled(int row){
+		for (int i=0; i<mStoreArray.length; i++){
+			if (mStoreArray[i][row] == 0) return false;
+		}
+		return true;
+	}
+	
+	/**
+	 * @param row The index of the column that should be checked
+	 * @return True if column is filled
+	 */
+	public boolean isColFilled(int col){
+		for (int i=0; i<mStoreArray[0].length; i++) {
+			if (mStoreArray[col][i] == 0) return false;
+		}
+		return true;
+	}
 	// End for Added for Project 1.2
 
 	public int getWidth() {
