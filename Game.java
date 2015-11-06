@@ -9,6 +9,47 @@ import.java.util.Random;
 
 public class Game
 {
+	//Constructors
+	public Game(Board initBoard, /*Hscore currentHScores,*/ ArrayList<Pentomino> pieces)
+	{
+		
+	}
+	
+	
+	/*Play method
+	//@return Gives the highscore including the current game
+	//Plays the game
+	
+	public HScore play()
+	{
+		
+	}
+	*/
+	
+	//Checking Methods
+	/**@param direc Takes the direction game wants to move the pent 
+	 * @return True if move is valid, false if not
+	 */
+	public boolean checkOverlap(Direction direc)
+	{
+		return false;
+	}
+	
+	/**@param direc Takes the direction game wants to rotate the pent 
+	 * @return True if move is valid, false if not
+	 */
+	public boolean checkRotate(Direction direc)
+	{
+		return true;
+	}
+	
+	/** @return True if game over, else false
+	 * If any overlap, game over
+	 */
+	public boolean gameOverChecker()
+	{
+		return false;
+	}
 
 	/**@return void
 	 * Makes the pentomino fall by 1 block after a set amount of time has elapsed
@@ -29,15 +70,13 @@ public class Game
 	{
 		assert direc == LEFT || direc == RIGHT || direc == DOWN;
 
-		if (direc == LEFT && checkMove(LEFT)==true){
+		if (direc == LEFT && checkMove(LEFT)==true)
 			coord.addX(-1);
 			
-		}
-		if (direc == RIGHT && checkMove(RIGHT)==true){
+		else if (direc == RIGHT && checkMove(RIGHT)==true)
 			coord.addX(1)
 			
-		}
-		if (direc == DOWN){
+		else if (direc == DOWN){
 			//pentFaller x2-faster
 		}
 	}
@@ -49,13 +88,13 @@ public class Game
 	//good job ;)
 	private void turn(Direction direc)
 	{
-		if (direc == LEFT){
-			this.item.rotate();
-			this.item.rotate();
-			this.item.rotate();
+		if (direc == LEFT && checkRotate(LEFT)==true){
+			this.pentUsed.rotate();
+			this.pentUsed.rotate();
+			this.pentUsed.rotate();
 		}
-		if (direc == RIGHT){
-			this.item.rotate();
+		else if (direc == RIGHT && checkRotate(RIGHT)==true){
+			this.pentUsed.rotate();
 		}
 		
 	}
@@ -89,8 +128,9 @@ public class Game
 	private void pentPicker()
 	{
 		Random random = new Random();
-		int index = random.nextInt(pentList.size());
-		Pentomino item = pentList.get(index);
+		int index = random.nextInt(blocks.size());
+		Pentomino pentUsed = blocks.get(index);
+		pentPosition = new Position(field.getWidth()/2,0);
 		
 	}
 	
@@ -102,10 +142,11 @@ public class Game
 // row mover needs to be called
 	private void rowClearer()
 	{
-		for (int i=nBoard.getHeight()-1; i=0;i--){
-			while (nBoard.isRowFilled(i) == true){
-				nBoard.clearRow(i);
-				rowMover();
+		for (int i=field.getHeight()-1; i=0;i--){
+			while (field.isRowFilled(i) == true){
+				field.clearRow(i);
+				while (field.isRowEmpty(i) == false)
+				rowMover(i);
 			}
 		}	
 	}
@@ -115,10 +156,27 @@ public class Game
 	 * Does this until rows with all zeros is going to be moved
 	 */
 	//good idea to write a helper method!
-	private void rowMover()
+	private void rowMover(int index)
 	{
-		nBoard.moveRows()
+		field.moveRows()
 	}
+
+	//Contains a Board
+	private Board field;
+	
+	//Contains the list of highscores
+	//private HScore highScore;
+	
+	//Contains all the tetris pieces
+	private ArrayList<Pentomino> blocks;
+	
+	//Contains the current Pentomino the game is using
+	private Pentomino pentUsed;
+	
+	//Contains the (x,y) of a Pentomino
+	private Position pentPosition;
+	
+	//Timer for the falling of tetris block
+	//private Clock fallTimer;
+
 	private MatrixHandler mMatrix;
-	private Board nBoard;
-	private Position coord;
