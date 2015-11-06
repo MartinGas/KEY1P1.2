@@ -8,10 +8,13 @@ enum Direction
 
 public class Game
 {
+	//suggestion: use classes implementing interface to set, store and modify timer
+	//add to pending changes file, once it exists
+	public final long mFALL_TIME = 1500;
 	//Constructors
 	public Game(Board initBoard, /*Hscore currentHScores,*/ ArrayList<Pentomino> pieces)
 	{
-		
+		fallTimer = new Timer (mFALL_TIME);
 	}
 	
 	/**
@@ -57,7 +60,8 @@ public class Game
 	 */
 	private void pentFaller()
 	{
-		
+		if (fallTimer.hasElapsed() && this.checkMove (Direction.DOWN))
+			pentPosition.addY (1);
 	}
 	
 	/** @param direc indicates the direction the pentomino should move
@@ -92,7 +96,7 @@ public class Game
 	//Maybe consider "smart placing" of initial pentomino
 	private void pentPicker()
 	{
-		
+		fallTimer.reset();
 	}
 	
 	
@@ -132,7 +136,7 @@ public class Game
 	//private Coord pentPosition;
 	
 	//Timer for the falling of tetris block
-	//private Clock fallTimer;
+	private Timer fallTimer;
 
 	
 }

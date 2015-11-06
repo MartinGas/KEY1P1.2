@@ -1,4 +1,3 @@
-package game.core;
 
 //class telling time between the last reset/instantiation and now
 //works with milliseconds
@@ -11,16 +10,18 @@ public class Timer
 	}	
 	
 	/** constructs Timer using the current time as reference**/
-	public Timer()
+	public Timer (long triggerTime)
 	{
+		mTriggerTime = triggerTime;
 		this.reset();
 	}
 	
 	/**constructs Timer using a point in time
 	* @param pointInTime Time to be used by Timer. Cannot be in the future**/
-	public Timer (long pointInTime)
+	public Timer (long pointInTime, long triggerTime)
 	{
 		assert (pointInTime <= Timer.getSystemTime());
+		mTriggerTime = triggerTime;
 		mLastTime = pointInTime;
 	}
 	
@@ -36,6 +37,11 @@ public class Timer
 		return (getSystemTime() - mLastTime);
 	}
 	
+	public boolean hasElapsed()
+	{
+		return (getElapsedTime() >= mTriggerTime);
+	}
+	
 	//stores reference to point in time as obtainted by getSystemTime
-	private long mLastTime;
+	private long mLastTime, mTriggerTime;
 }
