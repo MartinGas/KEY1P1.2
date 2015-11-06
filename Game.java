@@ -1,11 +1,11 @@
 import java.util.ArrayList;
-import.java.util.Random;
+import java.util.Random;
 
-	//Enumerated type that describes the direction pent moves 
-	enum Direction
-	{
-	UP, DOWN, LEFT, RIGHT
-	}
+//Enumerated type that describes the direction pent moves 
+enum Direction
+{
+UP, DOWN, LEFT, RIGHT
+}
 
 public class Game
 {
@@ -64,36 +64,33 @@ public class Game
 	 * @return void
 	 * Moves the block in a direction
 	 */
-	//works way easier: only adjust the position of the pentomino
-	//use assertion to prevent a method from feeding direc == UP (consult the book)
 	private void move(Direction direc)
 	{
-		assert direc == LEFT || direc == RIGHT || direc == DOWN;
+		assert direc == Direction.LEFT || direc == Direction.RIGHT || direc == Direction.DOWN;
 
-		if (direc == LEFT && checkMove(LEFT)==true)
-			coord.addX(-1);
+		if (direc == Direction.LEFT && checkMove(Direction.LEFT)==true)
+			pentPosition.addX(-1);
 			
-		else if (direc == RIGHT && checkMove(RIGHT)==true)
-			coord.addX(1)
-			
-		else if (direc == DOWN){
+		else if (direc == Direction.RIGHT && checkMove(Direction.RIGHT)==true)
+			pentPosition.addX(1);
+		/* discuss: necessity?
+		else if (direc == Direction.DOWN){
 			//pentFaller x2-faster
-		}
+		}*/
 	}
 	
 	/**@param direc indicates the direction the pentomino should move
 	 * @return void
 	 * Turns the block in a direction
 	 */
-	//good job ;)
 	private void turn(Direction direc)
 	{
-		if (direc == LEFT && checkRotate(LEFT)==true){
+		if (direc == Direction.LEFT && checkRotate(Direction.LEFT)==true){
 			this.pentUsed.rotate();
 			this.pentUsed.rotate();
 			this.pentUsed.rotate();
 		}
-		else if (direc == RIGHT && checkRotate(RIGHT)==true){
+		else if (direc == Direction.RIGHT && checkRotate(Direction.RIGHT)==true){
 			this.pentUsed.rotate();
 		}
 		
@@ -104,32 +101,41 @@ public class Game
 	 */
 	private void fallPlace()
 	{
-		if (nBoard.pentFits(this.item, coord)) 
+		//not desired:
+		if (field.pentFits(this.pentUsed, pentPosition.getPosNum(this.getHeight()))) 
 		{
-			for (int i=0; i< this.item.getWidth(); i++) 
+			for (int i=0; i< this.pentUsed.getWidth(); i++) 
 			{
-				for (int j=0; j< this.item.getHeight(); j++) 
+				for (int j=0; j< this.pentUsed.getHeight(); j++) 
 				{
-					if (this.item.getElement(i,j) != 0) 
+					if (this.pentUsed.getElement(i,j) != 0) 
 					{
-						mMatrix.setCell(i + coord.getX(), j + coord.getY(), this.item.getElement(i,j));
+						mMatrix.setCell(i + pentPosition.getX(), j + pentPosition.getY(), this.pentUsed.getElement(i,j));
 					}
 				}
 			}
-			mListPents.add (pent.clone());
+			blocks.add (pent.clone());
 		}
+		/*what this method does:
+		check whether pentomino fits in current position
+		iterate through cells of pentomino and set value of an uninitialized data field mMatrix 
+		to value of pentomino at respective position
+		
+		what this method should do
+		while pentomino may fall down by one row make it fall down
+		once the respective bottom has been reached, place the pentomino on the Board ('field')*/
+		
 	}
 	
 	/**@return void
 	 * Chooses from 1 of the pentominos and places it at the top of the board
 	 */
 	//Maybe consider "smart placing" of initial pentomino
-	//good job ;)
 	private void pentPicker()
 	{
 		Random random = new Random();
 		int index = random.nextInt(blocks.size());
-		Pentomino pentUsed = blocks.get(index);
+		pentUsed = blocks.get(index);
 		pentPosition = new Position(field.getWidth()/2,0);
 		
 	}
@@ -138,15 +144,14 @@ public class Game
 	/**@return void
 	 * Checks for filled rows (bottom up) and removes them
 	 */
-	//works but full rows are just being assigned value of 0
-// row mover needs to be called
 	private void rowClearer()
 	{
-		for (int i=field.getHeight()-1; i=0;i--){
+		for (int i=field.getHeight()-1; i >= 0 ;i--){
 			while (field.isRowFilled(i) == true){
 				field.clearRow(i);
+				//not exactly correct: you want to move every row above down by one row, not just one
 				while (field.isRowEmpty(i) == false)
-				rowMover(i);
+					rowMover(i);
 			}
 		}	
 	}
@@ -158,7 +163,12 @@ public class Game
 	//good idea to write a helper method!
 	private void rowMover(int index)
 	{
-		field.moveRows()
+		/*suggestion: transfer functionality
+		 * int iMove = index;
+		 * while (iMove > 0 && field.isRowFilled (iMove - 1))
+		 * 		field.moveRows(iMove);
+		 */
+		field.moveRows (index);
 	}
 
 	//Contains a Board
@@ -180,3 +190,5 @@ public class Game
 	//private Clock fallTimer;
 
 	private MatrixHandler mMatrix;
+
+}
