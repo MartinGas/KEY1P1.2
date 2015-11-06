@@ -1,0 +1,17 @@
+#this document lists changes which should/could be made to improve the program
+#these changes shall not be vital to the proper functioning of the program (=> no bugreports!)
+- MAKE THE PENTOMINO CLASS USE A POSITION OBJECT
+	Proposed: add a data field of type Position to the Pentomino class. Implement getter and 
+	setter methods. Thus a pentomino would hold pointer to its position on its own, instead of
+	having the Game class holding a position to the currently used pentomino. This change would
+	strengthen encapsulation!
+- SMART ROTATION
+	Proposed: Implement a method which returns how a pentomino should be shifted in order to 
+	perform a rotation which should be intuitively possible. If a rotation is not possible this
+	method should return to the caller that no changes are to be made. Call this method from
+	Game.turn
+- SMART INITIAL POSITIONING
+	Proposed: Implement a method which return where a newly picked pentomino should be placed.
+	Note that this method should only return the column where this pentomino is to be placed. 
+	If the game is inevitable over, the method should return to the caller that no changes are
+	to be made.
