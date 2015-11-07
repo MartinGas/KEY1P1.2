@@ -1,6 +1,9 @@
 #this file contains known bugs
 #if you fixed a bug place it in the *fixed* section
 #if you found a bug place it right before the fixed section
-
+Game.java
+- fallPlace does not place the pentomino used in the bottom most location. Wrong code, see comments
+- fix getting position of pentomino in checkMove, checkFall, checkRotate smartRotate
+- fix responsibility issues in check checkRotate, checkFall
 
 *fixed*

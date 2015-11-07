@@ -291,6 +291,54 @@ public class Board {
 		return true;				
 	}
 	
+	/** 
+	 * @param row The index of the row which will be set to the same as the row above
+	 */
+	public void moveRow(int row){
+		mMatrix.moveRow(row);
+	}
+	
+	/**
+	 * @param row The index of the row which will be deleted
+	 */
+	public void clearRow(int row){
+		mMatrix.clearRow(row);
+	}
+	
+	/**
+	 * @param row The index of the row that should be checked
+	 * @return True if row is filled
+	 */
+	public boolean isRowFilled(int row) {
+		return mMatrix.isRowFilled(row);
+	}
+	
+	/**
+	 * @param row The index of the column that should be checked
+	 * @return True if column is filled
+	 */
+	public boolean isColFilled(int col){
+		return mMatrix.isColFilled(col);
+	}
+	
+	/**
+	 * @param direc Which direction to look for the closest filled cell on the same row
+	 * @param position The cell number (in position number format)
+	 * @return Index of column the closest filled cell is in or -1 if there are none (borders = restrictions)
+	 */
+	public int getCloseRow(Direction direc,int position){
+		return mMatrix.getCloseRow(direc, position);
+	}
+	
+	/**
+	 * @param direc Which direction to look for the closest filled cell on the same col
+	 * @param position The cell coordinates which contain x and y
+	 * @return Index of row the closest filled cell is in or -1 if there are none (borders = restrictions)
+	 */
+	public int getCloseCol(Direction direc, int position) {
+		return mMatrix.getCloseCol(direc, position);
+	}
+	
 	public boolean equals (Board compare)
 	{
 		return (this.mMatrix.equals(compare.mMatrix));	
@@ -413,4 +461,6 @@ public class Board {
 	
 	/** Arraylist of type Pentomino */
 	private ArrayList<Pentomino> mListPents;
+	
+	private Direction direc;
 }
