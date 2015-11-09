@@ -20,6 +20,7 @@ public class Game
 		//look for nicer solution
 		blocks = (ArrayList<Pentomino>)pieces.clone();
 		//highScore = currentHScores;
+		pentPicker();
 	}
 	
 	
@@ -29,7 +30,48 @@ public class Game
 	
 	public HScore play()
 	{
+		//generate random number for simulated user input
+		Random genMove = new Random();
+		//stores wheter game is over
+		boolean isOver = false;
+		//repeats while game is not over
+		while (!isOver)
+		{
+			//if pentomino is at the bottom
+			if (!checkMove (Direction.DOWN))
+			{
+				rowClearer();
+				pentPicker();
+				if (gameOverChecker())
+					isOver = true;
+			}
+			if (!isOver)
+			{
+				pentFaller();
+				//get user input once player class is done
+				//select random move instead
+				int randMove = genMove.nextInt(3);
+				Direction randDirec;
+				switch (randMove)
+				{
+				case 0: randDirec = Direction.LEFT;
+				break;
+				case 1: randDirec = Direction.RIGHT;
+				break;
+				case 2: randDirec = Direction.DOWN;
+				break;
+				}
+				assert (randDirec != null);
+				//apply move
+				if (randMove < 2 && checkMove (randDirec))
+					move (randDirec);
+				else if (randMove == 2)
+					fallPlace();
+					
+			}
+		}
 		
+		System.out.println ("Oh no, the game is over!");
 	}
 	
 	
@@ -39,6 +81,7 @@ public class Game
 	 */
 	public boolean checkMove(Direction direc)
 	{	
+		assert (direc == Direction.LEFT || direc == Direction.RIGHT || direc == Direction.DOWN);
 		Pentomino pentClone = pentUsed.clone();	
 		//Moving to the right
 		if (direc == Direction.RIGHT)
@@ -68,6 +111,17 @@ public class Game
 			}
 			return false;
 		}
+		
+		//Moving downwards
+		if (direc == Direction.DOWN)
+		{
+			//Get int position if pent moved downwards
+			Position below = new Position (pentPosition.getX(), pentPosition.getY());
+			below.addY (1);
+			if (below.getY() >= field.getHeight() && 
+				field.pentFits(pentClone, below.getPosNum (field.getHeight())))
+				return true;
+		}
 		return false;
 	}
 	
@@ -81,10 +135,8 @@ public class Game
 			//Clone Pentomino and rotate clockwise
 			Pentomino pentClone = pentUsed.clone();
 			pentClone.rotate();
-			//Find the adjusted position to place left-top as an int
-			Position adjustedPos = this.smartRotate();
 			//Check if this rotated pent can fit
-			if (field.pentFits (pentClone, adjustedPos.getPosNum(field.getHeight())))
+			if (field.pentFits (pentClone, pentPosition.getPosNum(field.getHeight())))
 			{
 				return true;
 			}
@@ -113,8 +165,11 @@ public class Game
 	 */
 	private void pentFaller()
 	{
-		if (fallTimer.hasElapsed() && this.checkMove (Direction.DOWN))
-			pentPosition.addY (1);
+		if (fallTimer.hasElapsed())
+		{
+			if (this.checkMove (Direction.DOWN))
+				this.move (Direction.DOWN);
+		}
 	}
 	
 	/** @param direc indicates the direction the pentomino should move
@@ -130,10 +185,9 @@ public class Game
 			
 		else if (direc == Direction.RIGHT && checkMove(Direction.RIGHT)==true)
 			pentPosition.addX(1);
-		/* discuss: necessity?
 		else if (direc == Direction.DOWN){
-			//pentFaller x2-faster
-		}*/
+			pentPosition.addY(1);
+		}
 	}
 	
 	/**@param direc indicates the direction the pentomino should move
@@ -159,7 +213,8 @@ public class Game
 	private void fallPlace()
 	{
 		//not desired:
-		if (field.pentFits(this.pentUsed, pentPosition.getPosNum(field.getHeight()))) 
+		
+		/*if (field.pentFits(this.pentUsed, pentPosition.getPosNum(field.getHeight()))) 
 		{
 			for (int i=0; i< this.pentUsed.getWidth(); i++) 
 			{
@@ -172,16 +227,21 @@ public class Game
 				}
 			}
 			blocks.add (pentUsed.clone());
-		}
+		}*/
 		/*what this method does:
 		check whether pentomino fits in current position
 		iterate through cells of pentomino and set value of an uninitialized data field mMatrix 
 		to value of pentomino at respective position
-		
-		what this method should do
+		what this method should do:
 		while pentomino may fall down by one row make it fall down
 		once the respective bottom has been reached, place the pentomino on the Board ('field')*/
 		
+		
+		//make pentomino fall down until it reaches the bottom
+		while (this.checkMove(Direction.DOWN))
+			this.move(Direction.DOWN);
+		//place pentomino on the board
+		field.placePent(pentUsed, pentPosition.getPosNum(field.getHeight()));
 	}
 	
 	/**@return void
@@ -194,7 +254,7 @@ public class Game
 		Random random = new Random();
 		int index = random.nextInt(blocks.size());
 		pentUsed = blocks.get(index);
-		pentPosition = new Position(field.getWidth()/2,0);
+		pentPosition = new Position((int)Math.ceil(field.getWidth() / 2),0);
 	}
 	
 	
@@ -203,29 +263,29 @@ public class Game
 	 */
 	private void rowClearer()
 	{
-		for (int i=field.getHeight()-1; i >= 0 ;i--){
-			while (field.isRowFilled(i) == true){
-				field.clearRow(i);
-				//not exactly correct: you want to move every row above down by one row, not just one
-				while (field.isRowEmpty(i) == false)
-					rowMover(i);
+		int cRow = field.getHeight() - 1;
+		while (cRow >= 0 && !field.isRowEmpty(cRow))
+		{
+			while (field.isRowFilled (cRow))
+			{
+				field.clearRow (cRow);
+				rowMover (cRow);
 			}
-		}	
+			--cRow;
+		}
 	}
 	
 	/**@return void
 	 * After a row is cleared, replaces cleared rows with above rows.
 	 * Does this until rows with all zeros is going to be moved
 	 */
-	//good idea to write a helper method!
 	private void rowMover(int index)
 	{
-		/*suggestion: transfer functionality
-		 * int iMove = index;
-		 * while (iMove > 0 && field.isRowFilled (iMove - 1))
-		 * 		field.moveRows(iMove);
-		 */
-		field.moveRow (index);
+		while (index > 0 && field.isRowEmpty (index) == false)
+		{
+			field.moveRow (index);
+			index--;
+		}
 	}
 	
 	/**@param int Takes left top cell of the matrix the pentomino is in (not the left top cell of the pentomino) as an int
