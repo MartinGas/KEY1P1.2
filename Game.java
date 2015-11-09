@@ -31,31 +31,32 @@ public class Game
 	 */
 	public boolean checkMove(Direction direc)
 	{	
+		Pentomino pentClone = pentUsed.clone();	
 		//Moving to the right
 		if (direc == Direction.RIGHT)
 		{
-			//Move the piece in the appropiate direction
-			pentUsed.move(direc);
-			//Get the int position of the Pent after its been moved
-			int rPos = pentUsed.getPosNum();
-				if (pentFits(pentUsed, rPos))
-				{
-					return true;
-				}
-				return false;
+			//Get the int position of left top if moved to the right
+			Position right = pentPosition.addX(1);
+			int rPos = right.getPosNum(field.getHeight());
+			//Check if it fits
+			if (pentFits(pentClone, rPos))
+			{
+				return true;
+			}
+			return false;
 		}
 		//Moving to the left
 		if (direc == Direction.LEFT)
 		{
-			//Move the piece in the appropiate direction
-			pentUsed.move(direc);
-			//Get the int position of the Pent after its been moved
-			int lPos = pentUsed.getPosNum();
-				if (pentFits(pentUsed, lPos))
-				{
-					return true;
-				}
-				return false;
+			//Get the int position of left top if moved to the left
+			Position left = pentPosition.addX(-1);
+			int lPos = left.getPosNum(field.getHeight());
+			//Check if it fits
+			if (pentFits(pentClone, lPos))
+			{
+				return true;
+			}
+			return false;
 		}
 		return false;
 	}
@@ -67,12 +68,14 @@ public class Game
 	{
 		if (direc == Direction.UP)
 		{
-			//Rotate the cloned pent now clockwise
+			//Clone Pentomino and rotate clockwise
 			Pentomino pentClone = pentUsed.clone();
 			pentClone.turn();
-			int pos = pentUsed.smartRotate();
+			//Find the adjusted position to place left-top as an int
+			Position adjustedPos = pentUsed.smartRotate();
+			int newPos = adjustedPos.getPosNum(field.getHeight());
 			//Check if this rotated pent can fit
-			if (pentFits(pentClone, pos)
+			if (pentFits(pentClone, newPos)
 				{
 					return true;
 				}
@@ -87,23 +90,11 @@ public class Game
 	public boolean gameOverChecker()
 	{
 		//This method should return the cell where the left top of the petomino should be placed when it appears on the board
-		int pos = pentUsed.getPosNum();
+		int pos = pentPosition.getPosNum(field.getHeight());
 		//Checks if the pentomino can even be placed
 		if (pentFits(pentUsed, pos))
 		{
 			return false;
-		} else 
-		{
-			//Checks if rotated cloned pent can be placed
-			//Maybe dont clone and not have to rotate again when placing the pent?
-			Pentomino pentClone = pentUsed.clone();
-			pentClone.turn();
-			int newPos = pentClone.smartRotate();
-			if (pentFits(pentClone, newPos))
-			{
-				return false;
-			}
-			return true;
 		}
 		return true;
 	}
@@ -133,7 +124,7 @@ public class Game
 	 */
 	private void turn(Direction direc)
 	{
-		//I think this method in no longer needed, the pent can only turn in 1 direction and .rotate accomplishes this
+	
 	}
 	
 	/**@return void
@@ -186,10 +177,9 @@ public class Game
 	/**@param int Takes left top cell of the matrix the pentomino is in (not the left top cell of the pentomino) as an int
 	 * @return new postion of left top after 'smart' rotating
 	 */
-	public int smartRotate()
+	public Position smartRotate()
 	{
-		//Get Pent Position before turning
-		int pos = pentUsed.getPosNum();
+		//Get Pent Position
 		int moveLeft = 0;
 		int moveUp = 0;
 		//Get x-coordinate of the Pentomino
@@ -214,10 +204,12 @@ public class Game
 		{
 			int moveUp = (pentUsed.getWidth() - 1) - rowCounter;
 		}
+		
 		//Get new position that adjust for overlap
-		//Perhaps a method that can allow the (x,y) of position objects to be changed and a method that can convert a position back to an int would be better suited 
-		int newPos = pos - moveUp - field.getHeight()*moveLeft
-		return newPos;
+		Position adjustedPent = pentPosition;
+		adjustedPent.addX(-1*moveLeft);
+		adjustedPent.addY(-1*moveUp);
+		return adjustedPent;
 	}
 	
 	//Contains a Board
@@ -233,10 +225,10 @@ public class Game
 	private Pentomino pentUsed;
 	
 	//Contains the (x,y) of a Pentomino
-	//private Coord pentPosition;
+	private Position pentPosition;
 	
 	//Timer for the falling of tetris block
-	//private Clock fallTimer;
+	private Clock fallTimer;
 
 	
 }
