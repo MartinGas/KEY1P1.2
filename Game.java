@@ -1,31 +1,23 @@
 import java.util.ArrayList;
-import java.util.Random;
 
-//Enumerated type that describes the direction pent moves 
+//Enumerated type that describes the direction pent moves
 enum Direction
 {
-UP, DOWN, LEFT, RIGHT
+	UP, DOWN, LEFT, RIGHT
 }
 
 public class Game
 {
-	//suggestion: use classes implementing interface to set, store and modify timer
-	//add to pending changes file, once it exists
-	public final long mFALL_TIME = 1500;
 	//Constructors
 	public Game(Board initBoard, /*Hscore currentHScores,*/ ArrayList<Pentomino> pieces)
 	{
-		fallTimer = new Timer (mFALL_TIME);
-		field = initBoard.clone();
-		//look for nicer solution
-		blocks = (ArrayList<Pentomino>)pieces.clone();
-		//highScore = currentHScores;
+		
 	}
 	
-	
-	/*Play method
-	//@return Gives the highscore including the current game
-	//Plays the game
+	/**
+	//Play method
+	/** @return Gives the highscore including the current game
+	 * Plays the game
 	
 	public HScore play()
 	{
@@ -37,17 +29,17 @@ public class Game
 	/**@param direc Takes the direction game wants to move the pent 
 	 * @return True if move is valid, false if not
 	 */
-	//Bugs in here, Eric promised fix!
 	public boolean checkMove(Direction direc)
 	{	
+		Pentomino pentClone = pentUsed.clone();	
 		//Moving to the right
 		if (direc == Direction.RIGHT)
 		{
-			//Move the piece in the appropiate direction
-			pentUsed.move(direc);
-			//Get the int position of the Pent after its been moved
-			int rPos = pentUsed.getPosNum();
-			if (pentFits(pentUsed, rPos))
+			//Get the int position of left top if moved to the right
+			Position right = pentPosition.addX(1);
+			int rPos = right.getPosNum(field.getHeight());
+			//Check if it fits
+			if (pentFits(pentClone, rPos))
 			{
 				return true;
 			}
@@ -56,15 +48,15 @@ public class Game
 		//Moving to the left
 		if (direc == Direction.LEFT)
 		{
-			//Move the piece in the appropiate direction
-			pentUsed.move(direc);
-			//Get the int position of the Pent after its been moved
-			int lPos = pentUsed.getPosNum();
-				if (pentFits(pentUsed, lPos))
-				{
-					return true;
-				}
-				return false;
+			//Get the int position of left top if moved to the left
+			Position left = pentPosition.addX(-1);
+			int lPos = left.getPosNum(field.getHeight());
+			//Check if it fits
+			if (pentFits(pentClone, lPos))
+			{
+				return true;
+			}
+			return false;
 		}
 		return false;
 	}
@@ -76,17 +68,18 @@ public class Game
 	{
 		if (direc == Direction.UP)
 		{
-			//Rotate the cloned pent now clockwise
+			//Clone Pentomino and rotate clockwise
 			Pentomino pentClone = pentUsed.clone();
-			pentClone.rotate();
-			//Martin's opinion: Beyond the responsibility of this method => remove
-			int pos = this.smartRotate();
+			pentClone.turn();
+			//Find the adjusted position to place left-top as an int
+			Position adjustedPos = pentUsed.smartRotate();
+			int newPos = adjustedPos.getPosNum(field.getHeight());
 			//Check if this rotated pent can fit
-			if (this.field.pentFits(pentClone, pos))
-			{
-				return true;
-			}
-			return false;
+			if (pentFits(pentClone, newPos)
+				{
+					return true;
+				}
+				return false;
 		}
 		return false;
 	}
@@ -94,41 +87,26 @@ public class Game
 	/** @return True if game over, else false
 	 * If any overlap, game over
 	 */
-	//buggy, Eric promised fix!
 	public boolean gameOverChecker()
 	{
 		//This method should return the cell where the left top of the petomino should be placed when it appears on the board
-		int pos = pentUsed.getPosNum();
+		int pos = pentPosition.getPosNum(field.getHeight());
 		//Checks if the pentomino can even be placed
 		if (pentFits(pentUsed, pos))
 		{
 			return false;
-		} 
-		//Martin's opinion again: Beyond responsibility of method
-		//pentPicker should carry out this task AND modify object accordingly (which this method doesn't => undesired behavior
-		else 
-		{
-			//Checks if rotated cloned pent can be placed
-			//Maybe dont clone and not have to rotate again when placing the pent?
-			Pentomino pentClone = pentUsed.clone();
-			pentClone.turn();
-			int newPos = pentClone.smartRotate();
-			if (pentFits(pentClone, newPos))
-			{
-				return false;
-			}
-			return true;
 		}
 		return true;
 	}
-
+	
+	//Modifying Methods
+	
 	/**@return void
 	 * Makes the pentomino fall by 1 block after a set amount of time has elapsed
 	 */
 	private void pentFaller()
 	{
-		if (fallTimer.hasElapsed() && this.checkMove (Direction.DOWN))
-			pentPosition.addY (1);
+		
 	}
 	
 	/** @param direc indicates the direction the pentomino should move
@@ -137,34 +115,16 @@ public class Game
 	 */
 	private void move(Direction direc)
 	{
-		assert direc == Direction.LEFT || direc == Direction.RIGHT || direc == Direction.DOWN;
-
-		if (direc == Direction.LEFT && checkMove(Direction.LEFT)==true)
-			pentPosition.addX(-1);
-			
-		else if (direc == Direction.RIGHT && checkMove(Direction.RIGHT)==true)
-			pentPosition.addX(1);
-		/* discuss: necessity?
-		else if (direc == Direction.DOWN){
-			//pentFaller x2-faster
-		}*/
+		
 	}
 	
-	/**@param direc indicates the direction the pentomino should move
+	/**@param direc indicates the direction the pentomino should turn
 	 * @return void
 	 * Turns the block in a direction
 	 */
 	private void turn(Direction direc)
 	{
-		if (direc == Direction.LEFT && checkRotate(Direction.LEFT)==true){
-			this.pentUsed.rotate();
-			this.pentUsed.rotate();
-			this.pentUsed.rotate();
-		}
-		else if (direc == Direction.RIGHT && checkRotate(Direction.RIGHT)==true){
-			this.pentUsed.rotate();
-		}
-		
+	
 	}
 	
 	/**@return void
@@ -172,29 +132,6 @@ public class Game
 	 */
 	private void fallPlace()
 	{
-		//not desired:
-		if (field.pentFits(this.pentUsed, pentPosition.getPosNum(this.getHeight()))) 
-		{
-			for (int i=0; i< this.pentUsed.getWidth(); i++) 
-			{
-				for (int j=0; j< this.pentUsed.getHeight(); j++) 
-				{
-					if (this.pentUsed.getElement(i,j) != 0) 
-					{
-						mMatrix.setCell(i + pentPosition.getX(), j + pentPosition.getY(), this.pentUsed.getElement(i,j));
-					}
-				}
-			}
-			blocks.add (pent.clone());
-		}
-		/*what this method does:
-		check whether pentomino fits in current position
-		iterate through cells of pentomino and set value of an uninitialized data field mMatrix 
-		to value of pentomino at respective position
-		
-		what this method should do
-		while pentomino may fall down by one row make it fall down
-		once the respective bottom has been reached, place the pentomino on the Board ('field')*/
 		
 	}
 	
@@ -204,11 +141,7 @@ public class Game
 	//Maybe consider "smart placing" of initial pentomino
 	private void pentPicker()
 	{
-		fallTimer.reset();
-		Random random = new Random();
-		int index = random.nextInt(blocks.size());
-		pentUsed = blocks.get(index);
-		pentPosition = new Position(field.getWidth()/2,0);
+		
 	}
 	
 	
@@ -217,38 +150,36 @@ public class Game
 	 */
 	private void rowClearer()
 	{
-		for (int i=field.getHeight()-1; i >= 0 ;i--){
-			while (field.isRowFilled(i) == true){
-				field.clearRow(i);
-				//not exactly correct: you want to move every row above down by one row, not just one
-				while (field.isRowEmpty(i) == false)
-					rowMover(i);
-			}
-		}	
+		
 	}
 	
 	/**@return void
 	 * After a row is cleared, replaces cleared rows with above rows.
 	 * Does this until rows with all zeros is going to be moved
 	 */
-	//good idea to write a helper method!
-	private void rowMover(int index)
+	private void rowMover()
 	{
-		/*suggestion: transfer functionality
-		 * int iMove = index;
-		 * while (iMove > 0 && field.isRowFilled (iMove - 1))
-		 * 		field.moveRows(iMove);
-		 */
-		field.moveRows (index);
+		
+	}
+	
+	public int getRows()
+	{
+		int row = board.getHeight();
+		return row;
+	}
+	
+	public int getColumns()
+	{
+		int column = board.getWidth();
+		return column;
 	}
 	
 	/**@param int Takes left top cell of the matrix the pentomino is in (not the left top cell of the pentomino) as an int
 	 * @return new postion of left top after 'smart' rotating
 	 */
-	public int smartRotate()
+	public Position smartRotate()
 	{
-		//Get Pent Position before turning
-		int pos = pentUsed.getPosNum();
+		//Get Pent Position
 		int moveLeft = 0;
 		int moveUp = 0;
 		//Get x-coordinate of the Pentomino
@@ -273,12 +204,14 @@ public class Game
 		{
 			int moveUp = (pentUsed.getWidth() - 1) - rowCounter;
 		}
+		
 		//Get new position that adjust for overlap
-		//Perhaps a method that can allow the (x,y) of position objects to be changed and a method that can convert a position back to an int would be better suited 
-		int newPos = pos - moveUp - field.getHeight()*moveLeft
-		return newPos;
+		Position adjustedPent = pentPosition;
+		adjustedPent.addX(-1*moveLeft);
+		adjustedPent.addY(-1*moveUp);
+		return adjustedPent;
 	}
-
+	
 	//Contains a Board
 	private Board field;
 	
@@ -295,8 +228,7 @@ public class Game
 	private Position pentPosition;
 	
 	//Timer for the falling of tetris block
-	private Timer fallTimer;
+	private Clock fallTimer;
 
-	private MatrixHandler mMatrix;
-
+	
 }
