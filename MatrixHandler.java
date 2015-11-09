@@ -115,6 +115,34 @@ public class MatrixHandler {
 		}
 		return true;
 	}
+	
+	/**
+	 * @param row index of row to check
+	 * @return True if every element in the row is 0
+	 */
+	public boolean isŔowEmpty (int row)
+	{
+		for (int cCol = 0; cCol < this.getWidth(); cCol++)
+		{
+			if (this.getCell(cCol, row) != 0)
+				return false;
+		}
+		return true;
+	}
+	
+	/**
+	 * @param column col index of column to check
+	 * @return True if every element in the column is 0
+	 */
+	public boolean isColEmpty (int col)
+	{
+		for (int cRow = 0; cRow < this.getHeight(); cRow++)
+		{
+			if (this.getCell (col, cRow) != 0)
+				return false;
+		}
+		return true;
+	}
 	// End for Added for Project 1.2
 
 	public int getWidth() {

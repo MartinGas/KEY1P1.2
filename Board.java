@@ -322,6 +322,22 @@ public class Board {
 	}
 	
 	/**
+	 * @param row The index of the row that should be checked
+	 * @return True if row is empty
+	 */
+	public boolean isRowEmpty(int row) {
+		return mMatrix.isŔowEmpty(row);
+	}
+	
+	/**
+	 * @param row The index of the column that should be checked
+	 * @return True if column is empty
+	 */
+	public boolean isColEmpty(int col){
+		return mMatrix.isColEmpty(col);
+	}
+	
+	/**
 	 * @param direc Which direction to look for the closest filled cell on the same row
 	 * @param position The cell number (in position number format)
 	 * @return Index of column the closest filled cell is in or -1 if there are none (borders = restrictions)
