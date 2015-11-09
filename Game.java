@@ -24,11 +24,11 @@ public class Game
 	}
 	
 	
-	Play method
-	//@return Gives the highscore including the current game
+	//Play method
+	/**@return Gives the highscore including the current game*/
 	//Plays the game
 	
-	public HScore play()
+	public /*HScore*/void play()
 	{
 		//generate random number for simulated user input
 		Random genMove = new Random();
