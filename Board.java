@@ -123,6 +123,7 @@ public class Board {
 		}
 		return true;
 	}
+	
 	/** This method puts the Pentomino on the LeftTop and returns true if succeeded */
 	public boolean putLeftTop(Pentomino pent) {
 		int position = this.getLeftTop();
@@ -156,6 +157,41 @@ public class Board {
 		}
 		//System.out.println ("Failed fit check!");
 		return false;
+	}
+	
+	/** Places pentomino at given position
+	 * @param pent pentomino to place
+	 * @param posNum position where to place pent; position number format
+	 */
+	public void placePent (Pentomino pent, int posNum)
+	{
+		int x = getXCoor(posNum);
+		int y = getYCoor(posNum);
+		int xpent = pent.getXCoor(pent.getLeftTop());
+		int ypent = pent.getYCoor(pent.getLeftTop());
+		//System.out.println("Pent.getlefttop: " + pent.getLeftTop());
+		int newX = x - xpent;
+		int newY = y - ypent;
+		//System.out.println("X: " + x + " Y: " + y );
+		//System.out.println(pent.getLeftTop());
+		//System.out.println("newX: " + newX + " newY: " + newY);
+		if (newX < 0 || newY < 0) 
+		{
+			//System.out.println ("Failed adjusted coordinate check");
+			return;
+		}
+		
+		if (this.pentFits(pent, posNum)) {
+			//System.out.println("Pent is now being placed.");
+			for (int i=0; i< pent.getWidth(); i++) {
+				for (int j=0; j< pent.getHeight(); j++) {
+					if (pent.getElement(i,j) != 0) {
+						mMatrix.setCell(i + newX, j + newY, pent.getElement(i,j));
+					}
+				}
+			}
+			mListPents.add (pent.clone());
+		}
 	}
 	
 	/**returns wether there is at least one pentomino placed on both boards*/
@@ -255,7 +291,7 @@ public class Board {
 		int y = getYCoor(position);
 		int xpent = -1;
 		int ypent = -1;
-		/** newX and newY are adjusted to the first filled cell of the pentomino */
+		/* newX and newY are adjusted to the first filled cell of the pentomino */
 		//Gets X and Y coordinates of Pentomino
 		if (mMatrix.getCell(x, y) == 0) {
 			xpent = pent.getXCoor(pent.getLeftTop());
