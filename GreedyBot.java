@@ -1,0 +1,15 @@
+
+public class GreedyBot extends Bot {
+
+	public GreedyBot(PerfMeasure pMeasure, String[] nameDataBase) {
+		super(pMeasure, nameDataBase);
+		// TODO Auto-generated constructor stub
+	}
+
+	@Override
+	public Direction getMove() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+}
