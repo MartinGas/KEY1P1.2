@@ -15,3 +15,11 @@
 	Note that this method should only return the column where this pentomino is to be placed. 
 	If the game is inevitable over, the method should return to the caller that no changes are
 	to be made.
+- MAKE BOT USE ROTATION
+- IMPLEMENT TREE DATA STRUCTURE FOR TREE SEARCH BOT
+	Proposed: Data structure storing nodes of tree already computed. Can be reused for updated 
+	game situation to speed up computation
+- IMPROVE BOTS GAME SIMULATION
+	Proposed: Perform simulation as if a real game was played => make bot consider possible 
+	limitation of moves
+- IMPLEMENT MONTE CARLO SEARCH TREE BOT

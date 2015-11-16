@@ -194,7 +194,7 @@ public class Game
 	 * @return void
 	 * Turns the block in a direction
 	 */
-	private void turn(Direction direc)
+	private void turn (Direction direc)
 	{
 		if (direc == Direction.LEFT && checkRotate(Direction.LEFT)==true){
 			this.pentUsed.rotate();
