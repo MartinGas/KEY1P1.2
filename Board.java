@@ -124,7 +124,9 @@ public class Board {
 		return true;
 	}
 	
-	/** This method puts the Pentomino on the LeftTop and returns true if succeeded */
+	/** Places left top most filled cell of the pentomino in the left top most corner of the Board
+	 * @param pent Pentomino to be placed
+	 * @return true on success, false otherwise*/
 	public boolean putLeftTop(Pentomino pent) {
 		int position = this.getLeftTop();
 		int x = getXCoor(position);
@@ -143,7 +145,7 @@ public class Board {
 			return false;
 		}
 		
-		if (this.pentFits(pent, position)) {
+		if (this.pentFits(pent, this.getPosNum(newX, newY))) {
 			//System.out.println("Pent is now being placed.");
 			for (int i=0; i< pent.getWidth(); i++) {
 				for (int j=0; j< pent.getHeight(); j++) {
@@ -165,24 +167,14 @@ public class Board {
 	 */
 	public void placePent (Pentomino pent, int posNum)
 	{
+		//get coordinates from position number
 		int x = getXCoor(posNum);
 		int y = getYCoor(posNum);
-		int xpent = pent.getXCoor(pent.getLeftTop());
-		int ypent = pent.getYCoor(pent.getLeftTop());
-		//System.out.println("Pent.getlefttop: " + pent.getLeftTop());
-		int newX = x - xpent;
-		int newY = y - ypent;
-		//System.out.println("X: " + x + " Y: " + y );
-		//System.out.println(pent.getLeftTop());
-		//System.out.println("newX: " + newX + " newY: " + newY);
-		if (newX < 0 || newY < 0) 
-		{
-			//System.out.println ("Failed adjusted coordinate check");
-			return;
-		}
 		
-		if (this.pentFits(pent, posNum)) {
-			//System.out.println("Pent is now being placed.");
+		//check if pentomino fits
+		if (this.pentFits(pent, posNum)) 
+		{
+			//copy every corresponding cell
 			for (int i=0; i< pent.getWidth(); i++) {
 				for (int j=0; j< pent.getHeight(); j++) {
 					if (pent.getElement(i,j) != 0) {
@@ -190,6 +182,7 @@ public class Board {
 					}
 				}
 			}
+			//add pent to list of pents placed on board
 			mListPents.add (pent.clone());
 		}
 	}
@@ -289,37 +282,16 @@ public class Board {
 		//Gets X and Y coordinates from the exact position
 		int x = getXCoor(position);
 		int y = getYCoor(position);
-		int xpent = -1;
-		int ypent = -1;
-		/* newX and newY are adjusted to the first filled cell of the pentomino */
-		//Gets X and Y coordinates of Pentomino
-		if (mMatrix.getCell(x, y) == 0) {
-			xpent = pent.getXCoor(pent.getLeftTop());
-			ypent = pent.getYCoor(pent.getLeftTop());
-			//System.out.println("XPENT: " + xpent + " YPENT: " + ypent);
-			//System.out.println("Width pent: " + pent.getWidth() + " Height pent: " + pent.getHeight());
-		} else {
-			//System.out.println ("Topleft cell " + x + "|" + y + " given is not empty");
-			return false;
-		}
-		int newX = x - xpent;
-		int newY = y - ypent;
-		//System.out.println ("Got X = " + x + " y = " + y);
-		//System.out.println("NewX: " + newX + " NewY: " + newY);
-		/** Checks if pent is in boundaries */
-		if (((newX+pent.getWidth()) > this.getWidth()) || ((newY+pent.getHeight()) > this.getHeight())) 
-		{
-			//System.out.println ("Pentomino matrix does not fit in board");
-			return false;
-		}
 		
-		/** Loops through pent and Board and checks if Board==0||Pent==0 */
+		//check if dimensions fit
+		if (x + pent.getWidth() >= this.getWidth() || y + pent.getHeight() >= this.getHeight())
+			return false;
+		
+		// Loops through pent and Board and checks if Board==0||Pent==0
 		for (int i=0; i< pent.getWidth(); i++) {
 			for (int j=0; j< pent.getHeight(); j++) {
-				if (this.getElement(newX + i, newY + j) != 0 && pent.getElement(i, j) != 0) 
+				if (this.getElement(x + i, y + j) != 0 && pent.getElement(i, j) != 0) 
 				{
-					//System.out.println ("Non matching element at " + i + "|" + j + " on pentomino and at " + 
-						//(newX + i) + "|" + (newY + j) + " on board");
 					return false;
 				}
 			}
@@ -408,7 +380,17 @@ public class Board {
 		}
 		return true;
 	}
-			
+	
+	/**
+	 * @param x given x coordinate
+	 * @param y given y coordinate
+	 * @return position number given coordinates and height of the board
+	 */
+	public int getPosNum (int x, int y)
+	{
+		return (this.getHeight() * y + x + 1);
+	}
+	
 	/** Returns the X position of the cell */
 	public int getXCoor(int position) {
 		int height = mMatrix.getHeight();
