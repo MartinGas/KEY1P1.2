@@ -220,7 +220,7 @@ public class Game implements Cloneable
 		//pentPosition to be changed
 		pentPosition = smartRotate();
 		
-		if (direc == Direction.UP && checkRotate(Direction.UP)==true)
+		if (direc == Direction.UP && checkRotate(Direction.UP))
 		{
 			//If check is true, then rotate pentomino
 			this.pentUsed.rotate();
@@ -281,7 +281,6 @@ public class Game implements Cloneable
 		int index = random.nextInt(blocks.size());
 		pentUsed = blocks.get(11);
 		pentPosition = new Position((int)Math.ceil(field.getWidth() / 2),0);
-		pentPosition = smartPlace();
 	}
 	
 	
@@ -314,7 +313,6 @@ public class Game implements Cloneable
 			field.moveRow (index);
 			index--;
 			lastLineClear = index;
-			System.out.println("ended rowmover");
 		}
 		field.clearRow(lastLineClear);
 	}
@@ -322,7 +320,7 @@ public class Game implements Cloneable
 	public void mutateMove(Direction direc)
 	{
 			this.move(direc);
-			this.mutatePlace();
+			//this.mutatePlace();
 	}
 	
 	public void mutateRotate(Direction direc)
@@ -332,7 +330,7 @@ public class Game implements Cloneable
 			
 			//Change the position of turned pentomino
 			//pentPosition = this.smartRotate();
-			this.mutatePlace();
+			//this.mutatePlace();
 		
 	}
 	
@@ -340,12 +338,13 @@ public class Game implements Cloneable
 	{
 		this.pentPicker();
 		gameOverChecker();
-		mutatePlace();
+		//mutatePlace();
 	}
 	
 	public void mutatePlace()
 	{
 		int pos = pentPosition.getPosNum(field.getHeight());
+		//Remove copyField later after testing
 		Board temp = copyField.clone();
 		temp.placePent(pentUsed, pos);
 		field = temp;
@@ -366,15 +365,15 @@ public class Game implements Cloneable
 		int moveLeft = 0;
 		int moveUp = 0;
 		//Get x-coordinate of the Pentomino
-		int xCoor = pentPosition.getX();					
+		int xCoor = pentPosition.getX();
 		int xCoorMax = field.getWidth();
 		//Get y-coordinate of the Pentomino	
 		int yCoor = pentPosition.getY();
 		int yCoorMax = field.getHeight();
 		//How many columns are to the right
-		int columnCounter = xCoorMax-xCoor;
+		int columnCounter = xCoorMax-xCoor-1;
 		//How may rows are there to the bottom of the board
-		int rowCounter = yCoorMax-yCoor;
+		int rowCounter = yCoorMax-yCoor-1;
 		//How many times should we move the pent to the left
 		if ((pentUsed.getHeight() - 1 - columnCounter)>0)
 		{
@@ -392,23 +391,6 @@ public class Game implements Cloneable
 		return adjustedPent;
 	}
 	
-	/** @return new postion of left top after 'smart' placing
-	 * Should only be temporary until getX() is fixed.
-	 */
-	public Position smartPlace()
-	{	
-		int moveDown = 0;
-		//How many times should we move the pent down
-		if (pentUsed.getElement(0, 0)==0)
-		{
-			moveDown = 1;
-		}
-		
-		//Get new position that adjusts for overlap
-		Position adjustedPent = pentPosition;
-		adjustedPent.addY(moveDown);
-		return adjustedPent;
-	}
 	
 	public int getCellValue(Position pos)
 	{
@@ -421,7 +403,8 @@ public class Game implements Cloneable
 	//Cloning method
 	public Object clone() throws CloneNotSupportedException
 	{
-		return super.clone();
+		Game cloned = (Game)super.clone();
+		return cloned;
 	}
 	
 	//Testing method
@@ -437,9 +420,11 @@ public class Game implements Cloneable
 	public void rowClearMove()
 	{
 		rowClearer();
-		
-		//Doesnt work
 		rowMover(4);
+	}
+	public void fallPlacer()
+	{
+		this.fallPlace();
 	}
 	
 	//Contains a Board
