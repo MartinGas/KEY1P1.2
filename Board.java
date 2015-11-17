@@ -178,7 +178,7 @@ public class Board {
 			for (int i=0; i< pent.getWidth(); i++) {
 				for (int j=0; j< pent.getHeight(); j++) {
 					if (pent.getElement(i,j) != 0) {
-						mMatrix.setCell(i + newX, j + newY, pent.getElement(i,j));
+						mMatrix.setCell(i + x, j + y, pent.getElement(i,j));
 					}
 				}
 			}
@@ -284,7 +284,7 @@ public class Board {
 		int y = getYCoor(position);
 		
 		//check if dimensions fit
-		if (x + pent.getWidth() >= this.getWidth() || y + pent.getHeight() >= this.getHeight())
+		if (x + pent.getWidth()-1 >= this.getWidth() || y + pent.getHeight()-1 >= this.getHeight())
 			return false;
 		
 		// Loops through pent and Board and checks if Board==0||Pent==0
