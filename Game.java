@@ -4,7 +4,7 @@ import java.util.Random;
 //Enumerated type that describes the direction pent moves 
 enum Direction
 {
-UP, DOWN, LEFT, RIGHT
+UP, DOWN, LEFT, RIGHT, NONE
 }
 
 public class Game implements Cloneable
@@ -21,19 +21,60 @@ public class Game implements Cloneable
 		//look for nicer solution
 		blocks = (ArrayList<Pentomino>)pieces.clone();
 		//highScore = currentHScores;
+		pentPicker();
 	}
 	
 	
 	//Play method
-	//@return Gives the highscore including the current game
+	/**@return Gives the highscore including the current game*/
 	//Plays the game
 	
-	/*
-	public HScore play()
+	public /*HScore*/void play()
+
 	{
+		//generate random number for simulated user input
+		Random genMove = new Random();
+		//stores wheter game is over
+		boolean isOver = false;
+		//repeats while game is not over
+		while (!isOver)
+		{
+			//if pentomino is at the bottom
+			if (!checkMove (Direction.DOWN))
+			{
+				rowClearer();
+				pentPicker();
+				if (gameOverChecker())
+					isOver = true;
+			}
+			if (!isOver)
+			{
+				pentFaller();
+				//get user input once player class is done
+				//select random move instead
+				int randMove = genMove.nextInt(3);
+				Direction randDirec = null;
+				switch (randMove)
+				{
+				case 0: randDirec = Direction.LEFT;
+				break;
+				case 1: randDirec = Direction.RIGHT;
+				break;
+				case 2: randDirec = Direction.DOWN;
+				break;
+				}
+				assert (randDirec != null);
+				//apply move
+				if (randMove < 2 && checkMove (randDirec))
+					move (randDirec);
+				else if (randMove == 2)
+					fallPlace();
+					
+			}
+		}
 		
+		System.out.println ("Oh no, the game is over!");
 	}
-	*/
 	
 	//Checking Methods
 	/**@param direc Takes the direction game wants to move the pent 
@@ -41,6 +82,7 @@ public class Game implements Cloneable
 	 */
 	public boolean checkMove(Direction direc)
 	{	
+		assert (direc == Direction.LEFT || direc == Direction.RIGHT || direc == Direction.DOWN);
 		Pentomino pentClone = pentUsed.clone();	
 		//Moving to the right
 		if (direc == Direction.RIGHT)
@@ -83,6 +125,17 @@ public class Game implements Cloneable
 			}
 			return false;
 		}
+		
+		//Moving downwards
+		if (direc == Direction.DOWN)
+		{
+			//Get int position if pent moved downwards
+			Position below = new Position (pentPosition.getX(), pentPosition.getY());
+			below.addY (1);
+			if (below.getY() >= field.getHeight() && 
+				field.pentFits(pentClone, below.getPosNum (field.getHeight())))
+				return true;
+		}
 		return false;
 	}
 	
@@ -96,15 +149,12 @@ public class Game implements Cloneable
 			//Clone Pentomino and rotate clockwise
 			Pentomino pentClone = pentUsed.clone();
 			pentClone.rotate();
-			//Find the adjusted position to place left-top as an int
-			Position adjustedPos = smartRotate();
-			int newPos = adjustedPos.getPosNum(field.getHeight());
+			
 			//Check if this rotated pent can fit
-			if (copyField.pentFits (pentClone, newPos))
+			if (field.pentFits (pentClone, pentPosition.getPosNum(field.getHeight())))
 			{
 				System.out.println("rotated");
 				return true;
-				
 			}
 			System.out.println("not rotated");
 			return false;
@@ -134,8 +184,11 @@ public class Game implements Cloneable
 	 */
 	private void pentFaller()
 	{
-		if (fallTimer.hasElapsed() || this.checkMove (Direction.DOWN))
-			pentPosition.addY (1);
+		if (fallTimer.hasElapsed())
+		{
+			if (this.checkMove (Direction.DOWN))
+				this.move (Direction.DOWN);
+		}
 	}
 	
 	/** @param direc indicates the direction the pentomino should move
@@ -151,30 +204,31 @@ public class Game implements Cloneable
 			
 		else if (direc == Direction.RIGHT && checkMove(Direction.RIGHT)==true)
 			pentPosition.addX(1);
-		/* discuss: necessity?
-		else if (direc == Direction.DOWN){
-			//pentFaller x2-faster
-		}*/
+		else if (direc == Direction.DOWN && checkMove(Direction.DOWN)==true){
+			pentPosition.addY(1);
+		}
 	}
 	
 	/**@param direc indicates the direction the pentomino should move
 	 * @return void
 	 * Turns the block in a direction
 	 */
-	private void turn(Direction direc)
+	private void turn (Direction direc)
 	{
-		//This if statement should be uneccessary we are only allowing clockwise rotations in our game. In the case we allow both,
-		//shouldnt Direction.Down be for counter-clockwise and Direction.Up for clockwise otherwise turn() and rotate() share the same enum type?
-		if (direc == Direction.LEFT && checkRotate(Direction.LEFT)==true){
-			this.pentUsed.rotate();
-			this.pentUsed.rotate();
-			this.pentUsed.rotate();
-		}
-		else if (direc == Direction.UP && checkRotate(Direction.UP)==true){
-			pentPosition = this.smartRotate();
-			this.pentUsed.rotate();
-		}
+		//temporary storage for pentPosition
+		Position tempPos = pentPosition;
+		//pentPosition to be changed
+		pentPosition = smartRotate();
 		
+		if (direc == Direction.UP && checkRotate(Direction.UP)==true)
+		{
+			//If check is true, then rotate pentomino
+			this.pentUsed.rotate();
+		}
+		else 
+		{
+			pentPosition = tempPos;
+		}
 	}
 	
 	/**@return void
@@ -183,7 +237,8 @@ public class Game implements Cloneable
 	private void fallPlace()
 	{
 		//not desired:
-		if (field.pentFits(this.pentUsed, pentPosition.getPosNum(field.getHeight()))) 
+		
+		/*if (field.pentFits(this.pentUsed, pentPosition.getPosNum(field.getHeight()))) 
 		{
 			for (int i=0; i< this.pentUsed.getWidth(); i++) 
 			{
@@ -196,16 +251,21 @@ public class Game implements Cloneable
 				}
 			}
 			blocks.add (pentUsed.clone());
-		}
+		}*/
 		/*what this method does:
 		check whether pentomino fits in current position
 		iterate through cells of pentomino and set value of an uninitialized data field mMatrix 
 		to value of pentomino at respective position
-		
-		what this method should do
+		what this method should do:
 		while pentomino may fall down by one row make it fall down
 		once the respective bottom has been reached, place the pentomino on the Board ('field')*/
 		
+		
+		//make pentomino fall down until it reaches the bottom
+		while (this.checkMove(Direction.DOWN))
+			this.move(Direction.DOWN);
+		//place pentomino on the board
+		field.placePent(pentUsed, pentPosition.getPosNum(field.getHeight()));
 	}
 	
 	/**@return void
@@ -218,11 +278,10 @@ public class Game implements Cloneable
 		copyField = field.clone();
 		fallTimer.reset();
 		Random random = new Random();
-		int index = random.nextInt();
+		int index = random.nextInt(blocks.size());
 		pentUsed = blocks.get(11);
-		pentPosition = new Position(field.getWidth()/2,0);
+		pentPosition = new Position((int)Math.ceil(field.getWidth() / 2),0);
 		pentPosition = smartPlace();
-		
 	}
 	
 	
@@ -231,29 +290,33 @@ public class Game implements Cloneable
 	 */
 	private void rowClearer()
 	{
-		for (int i=field.getHeight()-1; i >= 0 ;i--){
-			while (field.isRowFilled(i) == true){
-				field.clearRow(i);
-				//not exactly correct: you want to move every row above down by one row, not just one
-				while (field.isRowEmpty(i) == false)
-					rowMover(i);
+		int cRow = field.getHeight() - 1;
+		while (cRow >= 0 && !field.isRowEmpty(cRow))
+		{
+			while (field.isRowFilled (cRow))
+			{
+				field.clearRow (cRow);
+				rowMover (cRow);
 			}
-		}	
+			--cRow;
+		}
 	}
 	
 	/**@return void
 	 * After a row is cleared, replaces cleared rows with above rows.
 	 * Does this until rows with all zeros is going to be moved
 	 */
-	//good idea to write a helper method!
 	private void rowMover(int index)
 	{
-		/*suggestion: transfer functionality
-		 * int iMove = index;
-		 * while (iMove > 0 && field.isRowFilled (iMove - 1))
-		 * 		field.moveRows(iMove);
-		 */
-		field.moveRow (index);
+		int lastLineClear = index;
+		while (index > 0 && field.isRowEmpty (index) == false)
+		{
+			field.moveRow (index);
+			index--;
+			lastLineClear = index;
+			System.out.println("ended rowmover");
+		}
+		field.clearRow(lastLineClear);
 	}
 	
 	public void mutateMove(Direction direc)
@@ -312,13 +375,11 @@ public class Game implements Cloneable
 		int columnCounter = xCoorMax-xCoor;
 		//How may rows are there to the bottom of the board
 		int rowCounter = yCoorMax-yCoor;
-		
 		//How many times should we move the pent to the left
 		if ((pentUsed.getHeight() - 1 - columnCounter)>0)
 		{
 			moveLeft = (pentUsed.getHeight() - 1) - columnCounter;
 		}
-		
 		//How many times should we move the pent up
 		if ((pentUsed.getWidth() - 1 - rowCounter)>0)
 		{
@@ -328,9 +389,6 @@ public class Game implements Cloneable
 		Position adjustedPent = pentPosition;
 		adjustedPent.addX(-1*moveLeft);
 		adjustedPent.addY(-1*moveUp);
-		//Cloned again, I dont know how to work around it being cloned in check rotate and here as well
-		Pentomino pentClone = pentUsed.clone();
-		pentClone.rotate();
 		return adjustedPent;
 	}
 	
@@ -361,7 +419,7 @@ public class Game implements Cloneable
 	}
 	
 	//Cloning method
-	protected Object clone() throws CloneNotSupportedException
+	public Object clone() throws CloneNotSupportedException
 	{
 		return super.clone();
 	}
