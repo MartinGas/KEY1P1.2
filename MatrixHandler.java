@@ -120,7 +120,7 @@ public class MatrixHandler {
 	 * @param row index of row to check
 	 * @return True if every element in the row is 0
 	 */
-	public boolean isŔowEmpty (int row)
+	public boolean isRowEmpty (int row)
 	{
 		for (int cCol = 0; cCol < this.getWidth(); cCol++)
 		{
