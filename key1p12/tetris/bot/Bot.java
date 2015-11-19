@@ -7,7 +7,7 @@ import java.io.*;
 import java.util.LinkedList;
 import java.util.ArrayList;
 
-//abstract class every Bot should inherit from
+//abstract class every bot should inherit from
 public abstract class Bot implements Player
 {	
 	//non-static section
@@ -32,7 +32,7 @@ public abstract class Bot implements Player
 		 * @param event event that occurred
 		 */
 		@Override
-		public void performAction(Game.SimulGame state, GameAction event) 
+		public void performAction(SimulGame state, GameAction event) 
 		{
 			if (event == GameAction.PICK)
 				Bot.this.update(state);
@@ -67,7 +67,7 @@ public abstract class Bot implements Player
 	 * @param state current state of game
 	 * @return performance measure return value
 	 */
-	public int evaluateState (Game state)
+	public int evaluateState (Game.SimulGame state)
 	{
 		return mPMeasure.getPerf(state);
 	}
@@ -97,10 +97,10 @@ public abstract class Bot implements Player
 		 * Constructs instruction set from state of the game
 		 * @param state state the game is in
 		 */
-		public InstructionSet (Game state)
+		public InstructionSet (SimulGame state)
 		{
 			mMoveQueue = new LinkedList <Direction> ();
-			mState = (Game)state.clone();
+			mState = state.clone();
 			mPScore = 0;
 			mMoveOccurred = false;
 		}
@@ -113,7 +113,7 @@ public abstract class Bot implements Player
 		{
 			mMoveQueue = new LinkedList <Direction> ();
 			assert (lastGen.moveExecuted()):
-			mState = (Game)lastGen.mState.clone();
+			mState = lastGen.mState.clone();
 			mPScore = 0;
 			mMoveOccurred = false;
 		}
@@ -129,12 +129,13 @@ public abstract class Bot implements Player
 			assert (!origin.moveExecuted());
 			mMoveQueue = new LinkedList <Direction> (origin.mMoveQueue);
 			mMoveQueue.add (move);
-			mState = (Game)origin.mState.clone();
+			mState = origin.mState.clone();
 			switch (move)
 			{
 			case LEFT:
 			case RIGHT: mState.move (move); break;
-			case UP: mState.turn (move); break;
+			case UP: mState.pentRotate(); break;
+			default: break;
 			}
 			mPScore = 0;
 			mMoveOccurred = false;
@@ -228,12 +229,12 @@ public abstract class Bot implements Player
 		}
 		
 		private LinkedList <Direction> mMoveQueue;
-		private Game mState;
+		private Game.SimulGame mState;
 		private int mPScore;
 		private boolean mMoveOccurred;
 	}
 	
-	public abstract void update (Game state);
+	public abstract void update (Game.SimulGame state);
 	
 	/**
 	 * Sets ideal move variable

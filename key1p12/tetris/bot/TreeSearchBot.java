@@ -3,7 +3,7 @@ package key1p12.tetris.bot;
 import java.io.*;
 import java.util.ArrayList;
 
-import key1p12.tetris.game.Game;
+import key1p12.tetris.game.Game.SimulGame;
 
 public class TreeSearchBot extends GreedyBot {
 	
@@ -24,7 +24,7 @@ public class TreeSearchBot extends GreedyBot {
 	 * updates move target
 	 * @param state current state of game
 	 */
-	public void update (Game state)
+	public void update (SimulGame state)
 	{
 		makeDecision (state);
 	}
@@ -33,7 +33,7 @@ public class TreeSearchBot extends GreedyBot {
 	 * determines best move
 	 * @param state current state of game
 	 */
-	public void makeDecision (Game state)
+	public void makeDecision (SimulGame state)
 	{
 		//compute immediate moves
 		ArrayList <InstructionSet> firstMoves = super.genPossibleMoves (new InstructionSet (state));

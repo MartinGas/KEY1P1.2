@@ -4,7 +4,7 @@ import key1p12.tetris.game.Game;
 
 public interface PerfMeasure 
 {
-	public int getPerf (Game state);
+	public int getPerf (Game.SimulGame state);
 	
-	public int mayExceed (Game known, Game test);
+	public int mayExceed (Game.SimulGame known, Game.SimulGame test);
 }

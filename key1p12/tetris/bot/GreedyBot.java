@@ -5,7 +5,7 @@ import java.io.FileNotFoundException;
 import java.util.ArrayList;
 
 import key1p12.tetris.game.Direction;
-import key1p12.tetris.game.Game;
+import key1p12.tetris.game.Game.SimulGame;
 
 public class GreedyBot extends Bot {
 
@@ -24,7 +24,7 @@ public class GreedyBot extends Bot {
 	 * adapts best move to updated state, stores result
 	 * @param state current state of the game
 	 */
-	public void update (Game state)
+	public void update (SimulGame state)
 	{
 		makeDecision (state);
 	}
@@ -63,7 +63,7 @@ public class GreedyBot extends Bot {
 	 * best outcome determined by highest performance measure
 	 * @param state current state of game
 	 */
-	private void makeDecision (Game state)
+	private void makeDecision (SimulGame state)
 	{
 		//generate all possible moves
 		ArrayList <InstructionSet> moves = genPossibleMoves (new InstructionSet (state));

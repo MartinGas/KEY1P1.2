@@ -5,7 +5,7 @@ import java.io.FileNotFoundException;
 import java.util.*;
 
 import key1p12.tetris.game.Direction;
-import key1p12.tetris.game.Game;
+import key1p12.tetris.game.Game.SimulGame;
 
 public class GeneticBot extends Bot 
 {
@@ -32,7 +32,7 @@ public class GeneticBot extends Bot
 	 * Updates bot's move target
 	 * @param state current state of game
 	 */
-	public void update(Game state) 
+	public void update(SimulGame state) 
 	{
 		//generate starting population of subsequent moves
 		LinkedList <ArrayList <InstructionSet>> pop = genPopulation (new InstructionSet (state), mSearchDepth, mPopSize);
