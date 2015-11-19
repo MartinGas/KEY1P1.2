@@ -1,5 +1,9 @@
+//Java API imports
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Random;
+
+import key1p12.tetris.game.IGameListener;
 
 //Enumerated type that describes the direction pent moves 
 enum Direction
@@ -7,8 +11,75 @@ enum Direction
 UP, DOWN, LEFT, RIGHT
 }
 
+enum GameAction
+{
+	MOVE, TURN, FALL, PICK, CLEAR, LOSS
+}
+
 public class Game
 {
+	public static class SimulGame
+	{
+		public SimulGame (Game source) throws CloneNotSupportedException
+		{
+			mGame = (Game)source.clone();
+			mGame.mListeners.clear();
+		}
+		
+		public ArrayList <Pentomino> getBlocks()
+		{
+			return mGame.blocks;
+		}
+		
+		public Pentomino getUsedPent()
+		{
+			return mGame.pentUsed;
+		}
+		
+		public boolean checkMove (Direction d)
+		{
+			return mGame.checkMove(d);
+		}
+		
+		public boolean checkRotate (Direction d)
+		{
+			return mGame.checkRotate(d);
+		}
+		
+		public boolean isGameOver()
+		{
+			return mGame.gameOverChecker();
+		}
+		
+		public void move (Direction d)
+		{
+			mGame.move(d);
+		}
+		
+		public void pentRotate()
+		{
+			mGame.turn(Direction.UP);
+		}
+		
+		public void fallPlace()
+		{
+			mGame.fallPlace();
+		}
+		
+		public void pentPicker()
+		{
+			mGame.pentPicker();
+		}
+		
+		public void pickPent (int index)
+		{
+			assert (index >= 0 && index < mGame.blocks.size());
+			mGame.pentUsed = mGame.blocks.get (index).clone();
+		}
+		
+		private Game mGame;
+	}
+	
 	//suggestion: use classes implementing interface to set, store and modify timer
 	//add to pending changes file, once it exists
 	public final long mFALL_TIME = 1500;
@@ -20,9 +91,9 @@ public class Game
 		//look for nicer solution
 		blocks = (ArrayList<Pentomino>)pieces.clone();
 		//highScore = currentHScores;
+		mListeners = new HashMap <GameAction, ArrayList <IGameListener>>();
 		pentPicker();
 	}
-	
 	
 	//Play method
 	/**@return Gives the highscore including the current game*/
@@ -159,6 +230,23 @@ public class Game
 		}
 		return true;
 	}
+	
+	/**
+	 * Adds game listener to this game object
+	 * @param listener listener to add
+	 */
+	public void addListener (IGameListener listener)
+	{
+		GameAction[] actarr = {GameAction.MOVE, GameAction.TURN, GameAction.FALL, GameAction.PICK, GameAction.LOSS};
+		for (int cAct = 0; cAct < actarr.length; cAct++)
+		{
+			if (listener.isSensitive (actarr[cAct]))
+			{
+				if (!mListeners.containsKey (actarr[cAct]))
+					mListeners.put (actarr[cAct], new ArrayList <IGameListener>());
+				mListeners.get(actarr[cAct]).add (listener);
+		}
+	}
 
 	/**@return void
 	 * Makes the pentomino fall by 1 block after a set amount of time has elapsed
@@ -180,14 +268,13 @@ public class Game
 	{
 		assert direc == Direction.LEFT || direc == Direction.RIGHT || direc == Direction.DOWN;
 
-		if (direc == Direction.LEFT && checkMove(Direction.LEFT)==true)
+		if (direc == Direction.LEFT && checkMove(Direction.LEFT))
 			pentPosition.addX(-1);
-			
-		else if (direc == Direction.RIGHT && checkMove(Direction.RIGHT)==true)
+		else if (direc == Direction.RIGHT && checkMove(Direction.RIGHT))
 			pentPosition.addX(1);
-		else if (direc == Direction.DOWN){
+		else if (direc == Direction.DOWN && checkMove (Direction.DOWN))
 			pentPosition.addY(1);
-		}
+		notifyListeners (GameAction.MOVE);
 	}
 	
 	/**@param direc indicates the direction the pentomino should move
@@ -196,6 +283,7 @@ public class Game
 	 */
 	private void turn (Direction direc)
 	{
+		assert (direc == Direction.LEFT || direc == Direction.RIGHT);
 		if (direc == Direction.LEFT && checkRotate(Direction.LEFT)==true){
 			this.pentUsed.rotate();
 			this.pentUsed.rotate();
@@ -204,7 +292,7 @@ public class Game
 		else if (direc == Direction.RIGHT && checkRotate(Direction.RIGHT)==true){
 			this.pentUsed.rotate();
 		}
-		
+		notifyListeners (GameAction.TURN);
 	}
 	
 	/**@return void
@@ -212,36 +300,11 @@ public class Game
 	 */
 	private void fallPlace()
 	{
-		//not desired:
-		
-		/*if (field.pentFits(this.pentUsed, pentPosition.getPosNum(field.getHeight()))) 
-		{
-			for (int i=0; i< this.pentUsed.getWidth(); i++) 
-			{
-				for (int j=0; j< this.pentUsed.getHeight(); j++) 
-				{
-					if (this.pentUsed.getElement(i,j) != 0) 
-					{
-						mMatrix.setCell(i + pentPosition.getX(), j + pentPosition.getY(), this.pentUsed.getElement(i,j));
-					}
-				}
-			}
-			blocks.add (pentUsed.clone());
-		}*/
-		/*what this method does:
-		check whether pentomino fits in current position
-		iterate through cells of pentomino and set value of an uninitialized data field mMatrix 
-		to value of pentomino at respective position
-		what this method should do:
-		while pentomino may fall down by one row make it fall down
-		once the respective bottom has been reached, place the pentomino on the Board ('field')*/
-		
-		
-		//make pentomino fall down until it reaches the bottom
 		while (this.checkMove(Direction.DOWN))
 			this.move(Direction.DOWN);
 		//place pentomino on the board
 		field.placePent(pentUsed, pentPosition.getPosNum(field.getHeight()));
+		notifyListeners (GameAction.FALL);
 	}
 	
 	/**@return void
@@ -255,6 +318,7 @@ public class Game
 		int index = random.nextInt(blocks.size());
 		pentUsed = blocks.get(index);
 		pentPosition = new Position((int)Math.ceil(field.getWidth() / 2),0);
+		notifyListeners (GameAction.PICK);
 	}
 	
 	
@@ -263,16 +327,21 @@ public class Game
 	 */
 	private void rowClearer()
 	{
+		boolean clearHappened = false;
 		int cRow = field.getHeight() - 1;
 		while (cRow >= 0 && !field.isRowEmpty(cRow))
 		{
 			while (field.isRowFilled (cRow))
 			{
+				if (!clearHappened)
+					clearHappened = true;
 				field.clearRow (cRow);
 				rowMover (cRow);
 			}
 			--cRow;
 		}
+		if (clearHappened)
+			notifyListeners (GameAction.CLEAR);
 	}
 	
 	/**@return void
@@ -285,6 +354,19 @@ public class Game
 		{
 			field.moveRow (index);
 			index--;
+		}
+	}
+	
+	/**
+	 * Notifies all listeners sensitive to event
+	 * @param event event that occurred
+	 */
+	private void notifyListeners (GameAction event)
+	{
+		if (mListeners.containsKey())
+		{
+			for (IGameListener listener : mListeners.get(event))
+				listener.performAction (new SimulGame (this), event);
 		}
 	}
 	
@@ -341,9 +423,6 @@ public class Game
 	//Contains the (x,y) of a Pentomino
 	private Position pentPosition;
 	
-	//Timer for the falling of tetris block
-	private Timer fallTimer;
-
-	private MatrixHandler mMatrix;
+	private HashMap <GameAction, ArrayLisIGameListenerner>> mListeners;
 
 }

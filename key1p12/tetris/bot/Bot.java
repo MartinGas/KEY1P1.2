@@ -16,6 +16,10 @@ public abstract class Bot implements Player
 	//public section
 	public class PickListener implements IGameListener
 	{
+		/**
+		 * @param event GameAction to check for
+		 * @return true if listener is sensitive to PICK action
+		 */
 		@Override
 		public boolean isSensitive (GameAction event) 
 		{
@@ -24,6 +28,11 @@ public abstract class Bot implements Player
 			return false;
 		}
 		
+		/**
+		 * Updates the bot's move target on PICK event
+		 * @param state state of the game
+		 * @param event event that occurred
+		 */
 		@Override
 		public void performAction(Game.SimulGame state, GameAction event) 
 		{
