@@ -2,7 +2,8 @@ package key1p12.tetris.game;
 import java.util.*;
 
 /** We ll still stick to columns first and rows second for the counting */
-public class Board {
+public class Board implements Cloneable
+{
 	
 	public static Board assembleAuto (Board part1, Board part2, Board original)
 	{

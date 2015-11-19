@@ -1,5 +1,6 @@
 package key1p12.tetris.game;
-public class Position {
+public class Position implements Cloneable
+{
 	
 	/**factory method for constructing Position using a position number
 	 * @param posNum position number to be converted to coordinates

@@ -1,7 +1,8 @@
 package key1p12.tetris.game;
 import java.util.ArrayList;
 
-public class Pentomino { 
+public class Pentomino implements Cloneable
+{ 
 
 	/**Arraylist with the 12 original pentominoes */
 	public static ArrayList<Pentomino> createsPentList() {

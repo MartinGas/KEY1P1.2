@@ -2,7 +2,7 @@ package key1p12.tetris.game;
 
 //class telling time between the last reset/instantiation and now
 //works with milliseconds
-public class Timer
+public class Timer implements Cloneable
 {
 	/** @return time in format used by Timer class**/	
 	static long getSystemTime()

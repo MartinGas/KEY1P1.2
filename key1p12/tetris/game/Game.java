@@ -7,7 +7,7 @@ import java.util.Random;
 
 public class Game implements Cloneable
 {
-	public static class SimulGame
+	public static class SimulGame implements Cloneable
 	{
 		@SuppressWarnings("serial")
 		public class SimulSetupExc extends CloneNotSupportedException
@@ -27,18 +27,16 @@ public class Game implements Cloneable
 			}
 		}
 		
-		public SimulGame (Game source) throws SimulSetupExc
+		public SimulGame (Game source)
 		{
-			try
-			{
-				mGame = (Game)source.clone();
-			}
-			catch (CloneNotSupportedException e)
-			{
-				throw new SimulSetupExc ("could not clone game");
-			}
+			mGame = (Game)source.clone();
 			mGame.mListeners.clear();
 			assert (mGame.mListeners.isEmpty());
+		}
+		
+		public SimulGame clone ()
+		{
+			return new SimulGame (mGame);
 		}
 		
 		public ArrayList <Pentomino> getBlocks()
@@ -104,7 +102,7 @@ public class Game implements Cloneable
 	//add to pending changes file, once it exists
 	public final long mFALL_TIME = 1500;
 	//Constructors
-	public Game(Board initBoard, /*Hscore currentHScores,*/ ArrayList<Pentomino> pieces) throws SimulGame.SimulSetupExc
+	public Game(Board initBoard, /*Hscore currentHScores,*/ ArrayList<Pentomino> pieces)
 	{
 		mFallTimer = new Timer (mFALL_TIME);
 		
@@ -120,7 +118,7 @@ public class Game implements Cloneable
 	/**@return Gives the highscore including the current game*/
 	//Plays the game
 	
-	public /*HScore*/void play() throws SimulGame.SimulSetupExc
+	public /*HScore*/void play() 
 
 	{
 		//generate random number for simulated user input
@@ -171,7 +169,7 @@ public class Game implements Cloneable
 	/**@param direc Takes the direction game wants to move the pent 
 	 * @return True if move is valid, false if not
 	 */
-	public boolean checkMove(Direction direc) throws SimulGame.SimulSetupExc
+	public boolean checkMove(Direction direc) 
 	{	
 		assert (direc == Direction.LEFT || direc == Direction.RIGHT || direc == Direction.DOWN);
 		Pentomino pentClone = pentUsed.clone();	
@@ -291,7 +289,7 @@ public class Game implements Cloneable
 	/**@return void
 	 * Makes the pentomino fall by 1 block after a set amount of time has elapsed
 	 */
-	private void pentFaller() throws SimulGame.SimulSetupExc
+	private void pentFaller() 
 	{
 		if (mFallTimer.hasElapsed())
 		{
@@ -304,7 +302,7 @@ public class Game implements Cloneable
 	 * @return void
 	 * Moves the block in a direction
 	 */
-	private void move(Direction direc) throws SimulGame.SimulSetupExc
+	private void move(Direction direc) 
 	{
 		assert direc == Direction.LEFT || direc == Direction.RIGHT || direc == Direction.DOWN;
 
@@ -321,7 +319,7 @@ public class Game implements Cloneable
 	 * @return void
 	 * Turns the block in a direction
 	 */
-	private void turn (Direction direc) throws SimulGame.SimulSetupExc
+	private void turn (Direction direc) 
 	{
 		assert (direc == Direction.RIGHT);
 		//temporary storage for pentPosition
@@ -344,7 +342,7 @@ public class Game implements Cloneable
 	/**@return void
 	 * Places the block in the bottom most row (with a block)
 	 */
-	private void fallPlace() throws SimulGame.SimulSetupExc
+	private void fallPlace() 
 	{
 		while (this.checkMove(Direction.DOWN))
 			this.move(Direction.DOWN);
@@ -357,7 +355,7 @@ public class Game implements Cloneable
 	 * Chooses from 1 of the pentominos and places it at the top of the board
 	 */
 	//Maybe consider "smart placing" of initial pentomino
-	public void pentPicker() throws SimulGame.SimulSetupExc
+	public void pentPicker() 
 	{
 		//Saves board in previous state
 		copyField = field.clone();
@@ -373,7 +371,7 @@ public class Game implements Cloneable
 	/**@return void
 	 * Checks for filled rows (bottom up) and removes them
 	 */
-	private void rowClearer() throws SimulGame.SimulSetupExc
+	private void rowClearer() 
 	{
 		boolean clearHappened = false;
 		int cRow = field.getHeight() - 1;
@@ -408,7 +406,7 @@ public class Game implements Cloneable
 		field.clearRow(lastLineClear);
 	}
 	
-	public void mutateMove(Direction direc) throws SimulGame.SimulSetupExc
+	public void mutateMove(Direction direc) 
 	{
 			this.move(direc);
 			//this.mutatePlace();
@@ -418,7 +416,7 @@ public class Game implements Cloneable
 	 * Notifies all listeners sensitive to event
 	 * @param event event that occurred
 	 */
-	private void notifyListeners (GameAction event) throws SimulGame.SimulSetupExc
+	private void notifyListeners (GameAction event) 
 	{
 		if (mListeners.containsKey(event))
 		{
@@ -429,7 +427,7 @@ public class Game implements Cloneable
 	
 	/**@param int Takes left top cell of the matrix the pentomino is in (not the left top cell of the pentomino) as an int
 	 * @return new position of left top after 'smart' rotating*/
-	public void mutateRotate(Direction direc) throws SimulGame.SimulSetupExc
+	public void mutateRotate(Direction direc) 
 	{
 			//turn pentomino
 			this.turn(direc);
@@ -440,7 +438,7 @@ public class Game implements Cloneable
 		
 	}
 	
-	public void mutatePicker() throws SimulGame.SimulSetupExc
+	public void mutatePicker() 
 	{
 		this.pentPicker();
 		gameOverChecker();
@@ -507,10 +505,15 @@ public class Game implements Cloneable
 	}
 	
 	//Cloning method
-	public Object clone() throws CloneNotSupportedException
+	public Game clone()
 	{
-		Game cloned = (Game)super.clone();
-		return cloned;
+		try 
+		{ 
+			Game cloned = (Game)super.clone(); 
+			return cloned;
+		}
+		catch (CloneNotSupportedException e) {assert (false); }
+		return null;
 	}
 	
 	//Testing method
@@ -519,16 +522,16 @@ public class Game implements Cloneable
 		field.printBoard();
 	}
 	
-	public void fall() throws SimulGame.SimulSetupExc
+	public void fall() 
 	{
 		pentFaller();
 	}
-	public void rowClearMove() throws SimulGame.SimulSetupExc
+	public void rowClearMove() 
 	{
 		rowClearer();
 		rowMover(4);
 	}
-	public void fallPlacer() throws SimulGame.SimulSetupExc
+	public void fallPlacer() 
 	{
 		this.fallPlace();
 	}
