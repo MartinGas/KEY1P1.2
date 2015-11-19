@@ -1,3 +1,4 @@
+package key1p12.tetris.game;
 import java.util.*;
 
 /** We ll still stick to columns first and rows second for the counting */

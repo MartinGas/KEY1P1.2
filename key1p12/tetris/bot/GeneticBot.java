@@ -1,10 +1,11 @@
 package key1p12.tetris.bot;
-import Direction;
-import Game;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.*;
+
+import key1p12.tetris.game.Direction;
+import key1p12.tetris.game.Game;
 
 public class GeneticBot extends Bot 
 {

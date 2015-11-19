@@ -1,5 +1,8 @@
 import java.util.*;
 
+import key1p12.tetris.game.Board;
+import key1p12.tetris.game.Pentomino;
+
 public class SolvePents{
 	
 	

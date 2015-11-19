@@ -1,3 +1,4 @@
+package key1p12.tetris.game;
 /**
  * We define columns first and rows second (x,y)
  */

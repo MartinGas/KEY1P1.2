@@ -1,9 +1,7 @@
 package key1p12.tetris.bot;
 
 import key1p12.tetris.game.*;
-import Game;
-import Game.SimulGame;
-import Player;
+import key1p12.tetris.game.Game.SimulGame;
 
 import java.io.*;
 import java.util.LinkedList;

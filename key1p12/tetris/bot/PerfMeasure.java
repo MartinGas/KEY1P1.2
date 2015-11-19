@@ -1,5 +1,5 @@
 package key1p12.tetris.bot;
-import Game;
+import key1p12.tetris.game.Game;
 
 
 public interface PerfMeasure 

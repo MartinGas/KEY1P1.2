@@ -1,3 +1,4 @@
+package key1p12.tetris.game;
 
 //class telling time between the last reset/instantiation and now
 //works with milliseconds

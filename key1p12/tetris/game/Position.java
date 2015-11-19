@@ -1,3 +1,4 @@
+package key1p12.tetris.game;
 public class Position {
 	
 	/**factory method for constructing Position using a position number

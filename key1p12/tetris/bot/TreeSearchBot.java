@@ -1,8 +1,9 @@
 package key1p12.tetris.bot;
-import Game;
 
 import java.io.*;
 import java.util.ArrayList;
+
+import key1p12.tetris.game.Game;
 
 public class TreeSearchBot extends GreedyBot {
 	
