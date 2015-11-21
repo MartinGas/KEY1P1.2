@@ -165,6 +165,33 @@ public class Game implements Cloneable
 		System.out.println ("Oh no, the game is over!");
 	}
 	
+	/**
+	 * @return width of the board
+	 */
+	public int getWidth()
+	{
+		return field.getWidth();
+	}
+	
+	/**
+	 * @return height of the board
+	 */
+	public int getHeight()
+	{
+		return field.getHeight();
+	}
+	
+	/**
+	 * @param x column of cell
+	 * @param y row of cell
+	 * @return content of specified cell
+	 */
+	public int getElement (int x, int y)
+	{
+		assert (x < getWidth() && y < getHeight());
+		return field.getElement(x, y);
+	}
+	
 	//Checking Methods
 	/**@param direc Takes the direction game wants to move the pent 
 	 * @return True if move is valid, false if not
@@ -421,7 +448,7 @@ public class Game implements Cloneable
 		if (mListeners.containsKey(event))
 		{
 			for (IGameListener listener : mListeners.get(event))
-				listener.performAction (new SimulGame (this), event);
+				listener.performAction (this, event);
 		}
 	}
 	
