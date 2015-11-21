@@ -58,12 +58,12 @@ public class TreeSearchBot extends GreedyBot {
 	
 	private int iterBranch (InstructionSet root, int depth, int maxDepth)
 	{
-		
+		//TODO implement performance measure based pruning
 			
 				
 				
 					
-			//calculate average for best moves of pentominoes
+		//calculate average for best moves of pentominoes
 		int averageScore = 0;
 		//simulate every pentomino
 		ArrayList <InstructionSet> foUps = root.getFollowUp();

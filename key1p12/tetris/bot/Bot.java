@@ -32,10 +32,13 @@ public abstract class Bot implements Player
 		 * @param event event that occurred
 		 */
 		@Override
-		public void performAction(SimulGame state, GameAction event) 
+		public void performAction(Game state, GameAction event) 
 		{
 			if (event == GameAction.PICK)
-				Bot.this.update(state);
+			{
+				Bot.this.update(new Game.SimulGame(state));
+				
+			}
 		}
 	}
 	
@@ -50,7 +53,6 @@ public abstract class Bot implements Player
 		mPMeasure = pMeasure;
 		NameGenerator chooseName = new NameGenerator (nameBase);
 		mName = chooseName.getName();
-		mIdealCol = -1;
 		mIdealMove = null;
 	}
 	
@@ -79,7 +81,6 @@ public abstract class Bot implements Player
 	 */
 	public Direction getMove()
 	{
-		assert (mIdealMove != null);
 		assert (!mIdealMove.isEmpty());
 		Direction nextMove = mIdealMove.getMove();
 		mIdealMove.eraseHead();
@@ -249,6 +250,5 @@ public abstract class Bot implements Player
 	
 	private PerfMeasure mPMeasure;
 	private String mName;
-	private int mIdealCol;
 	private InstructionSet mIdealMove;
 }

@@ -13,5 +13,5 @@ public interface IGameListener
 	 * @param state state of the game
 	 * @param event event that occurred in the game
 	 */
-	public void performAction (Game.SimulGame state, GameAction event);
+	public void performAction (Game state, GameAction event);
 }
