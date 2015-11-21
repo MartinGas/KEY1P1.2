@@ -192,6 +192,25 @@ public class Game implements Cloneable
 		return field.getElement(x, y);
 	}
 	
+	/**
+	 * Behaves as if pentUsed was placed at current position on the board
+	 * @param x column of cell
+	 * @param y row of cell
+	 * @return content of specified cell
+	 */
+	public int getElementAndPent (int x, int y)
+	{
+		assert (x < getWidth() && y < getHeight());
+		if (x >= pentPosition.getX() && x < pentPosition.getX() + pentUsed.getWidth() &&
+			y >= pentPosition.getY() && y < pentPosition.getY() + pentUsed.getHeight())
+		{
+			int pentVal = pentUsed.getElement(x - pentPosition.getX(), y - pentPosition.getY());
+			if (pentVal != 0)
+				return pentVal;
+		}
+		return field.getElement(x, y);
+	}
+	
 	//Checking Methods
 	/**@param direc Takes the direction game wants to move the pent 
 	 * @return True if move is valid, false if not
