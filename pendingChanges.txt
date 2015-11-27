@@ -23,3 +23,6 @@
 	Proposed: Perform simulation as if a real game was played => make bot consider possible 
 	limitation of moves
 - IMPLEMENT MONTE CARLO SEARCH TREE BOT
+- HAVE THE GENETIC BOT USE RECOMBINATION AS WELL (only uses mutation for the moment)
+- ADAPT SELECTION MECHANISM FOR GENETIC BOT
+- USE .cvs FORMAT FOR HIGH SCORE LIST

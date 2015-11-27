@@ -1,6 +1,7 @@
 package key1p12.tetris.game;
 //Java API imports
 
+import java.awt.event.ActionEvent;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Random;
@@ -111,6 +112,8 @@ public class Game implements Cloneable
 		blocks = (ArrayList<Pentomino>)pieces.clone();
 		//highScore = currentHScores;
 		mListeners = new HashMap <GameAction, ArrayList <IGameListener>>();
+		mIsOver = false;
+		mIsPaused = true;
 		pentPicker();
 	}
 	
@@ -119,50 +122,60 @@ public class Game implements Cloneable
 	//Plays the game
 	
 	public /*HScore*/void play() 
-
 	{
-		//generate random number for simulated user input
-		Random genMove = new Random();
-		//stores whether game is over
-		boolean isOver = false;
-		//repeats while game is not over
-		while (!isOver)
+		if (isGamePaused())
 		{
-			//if pentomino is at the bottom
-			if (!checkMove (Direction.DOWN))
-			{
-				rowClearer();
-				pentPicker();
-				if (gameOverChecker())
-					isOver = true;
-			}
-			if (!isOver)
-			{
-				pentFaller();
-				//get user input once player class is done
-				//select random move instead
-				int randMove = genMove.nextInt(3);
-				Direction randDirec = null;
-				switch (randMove)
-				{
-				case 0: randDirec = Direction.LEFT;
-				break;
-				case 1: randDirec = Direction.RIGHT;
-				break;
-				case 2: randDirec = Direction.DOWN;
-				break;
-				}
-				assert (randDirec != null);
-				//apply move
-				if (randMove < 2 && checkMove (randDirec))
-					move (randDirec);
-				else if (randMove == 2)
-					fallPlace();
-					
-			}
+			mIsPaused = false;
+			mFallTimer.reset();
 		}
-		
-		System.out.println ("Oh no, the game is over!");
+		//if pentomino is at the bottom
+		if (!checkMove (Direction.DOWN))
+		{
+			rowClearer();
+			pentPicker();
+			if (gameOverChecker())
+				setGameOver();
+		}
+		if (isGameOver())
+		{
+			pentFaller();
+			//get user input once player class is done
+			//select random move instead
+			int randMove = genMove.nextInt(3);
+			Direction randDirec = null;
+			switch (randMove)
+			{
+			case 0: randDirec = Direction.LEFT;
+			break;
+			case 1: randDirec = Direction.RIGHT;
+			break;
+			case 2: randDirec = Direction.DOWN;
+			break;
+			}
+			assert (randDirec != null);
+			//apply move
+			if (randMove < 2 && checkMove (randDirec))
+				move (randDirec);
+			else if (randMove == 2)
+				fallPlace();
+				
+		}
+	}
+	
+	/**
+	 * @return score object of highest score
+	 */
+	public Score getHighScore()
+	{
+		return mHighScore.getHighScore();
+	}
+	
+	/**
+	 * @return score object of current score
+	 */
+	public Score getCurrScore()
+	{
+		return mHighScore.getCurrScore();
 	}
 	
 	/**
@@ -312,6 +325,28 @@ public class Game implements Cloneable
 		}
 		//System.out.println("Can't be placed");
 		return true;
+	}
+	
+	/**
+	 * @return cached boolean indicating whether game is over
+	 */
+	public boolean isGameOver()
+	{
+		return mIsOver;
+	}
+	
+	
+	public boolean isGamePaused()
+	{
+		return mIsPaused;
+	}
+	
+	/**
+	 * freezes current state of the game
+	 */
+	public void pause()
+	{
+		mIsPaused = true;
 	}
 	
 	/**
@@ -471,6 +506,14 @@ public class Game implements Cloneable
 		}
 	}
 	
+	/**
+	 * Sets state of game to over
+	 */
+	private void setGameOver()
+	{
+		mIsOver = true;
+	}
+	
 	/**@param int Takes left top cell of the matrix the pentomino is in (not the left top cell of the pentomino) as an int
 	 * @return new position of left top after 'smart' rotating*/
 	public void mutateRotate(Direction direc) 
@@ -604,6 +647,12 @@ public class Game implements Cloneable
 	//timer indicating whether pentomino should fall
 	private Timer mFallTimer;
 	
+	//maps game actions to related listeners added to the game
 	private HashMap <GameAction, ArrayList <IGameListener>> mListeners;
-
+	
+	//tells whether game is paused
+	private boolean mIsPaused;
+	
+	//stores whether game is over
+	private boolean mIsOver;
 }
