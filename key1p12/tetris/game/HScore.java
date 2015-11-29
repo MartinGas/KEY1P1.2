@@ -8,10 +8,39 @@ import java.util.*;
 
 public class HScore extends Score
 {
-	public static final int ENTRIES = 5;
+	/**
+	 * Creates file for storing a high score list
+	 * @param file file where list is to be stored
+	 * @param entries number of entries the list should contain
+	 * @throws IOException
+	 */
+	public static void generateHighScoreFile (File file, int entries) throws IOException
+	{
+		if (!file.exists())
+			file.createNewFile();
+		PrintWriter w = null;
+		try
+		{
+			w = new PrintWriter (file);
+			Score nullScore = new Score();
+			w.println (entries);
+			for (int cEntries = 0; cEntries < entries; ++cEntries)
+				w.println (nullScore.getScore() + " " + nullScore.getName());
+		}
+		finally
+		{
+			w.close();
+		}
+	}
 	
-	
-	public HScore(File file, String playerName, ScoreCountable scoreComputer)throws FileNotFoundException{
+	/**
+	 * Constructor
+	 * @param file file the highscore is to be read from and written to
+	 * @param playerName name of the current player
+	 * @param scoreComputer way to compute current score (independently of scores already stored)
+	 * @throws FileNotFoundException
+	 */
+	public HScore(File file, String playerName, ScoreCountable scoreComputer) throws FileNotFoundException {
 		super (playerName, scoreComputer);
 		mHighScores = new ArrayList <Score>();
 		mStorage = file;
@@ -27,7 +56,14 @@ public class HScore extends Score
 			{
 				throw new FileNotFoundException("file not found!");
 			}
-			for (int cEntries = 0; cEntries < ENTRIES; cEntries++)
+			
+			mEntries = 0;
+			if (scanner.hasNext())
+			{
+				mEntries = scanner.nextInt();
+				scanner.nextLine();
+			}
+			for (int cEntries = 0; cEntries < mEntries; cEntries++)
 			{
 				if (scanner.hasNext())
 				{					
@@ -50,20 +86,46 @@ public class HScore extends Score
 		}
 	}
 	
-	//writes the new values to the file
+	/**
+	 * locks the object and writes changes to file
+	 * @throws IOException
+	 */
 	public void writeToFile () throws IOException
 	{
-		super.lock();
-		insertCurrentToList();
-		PrintWriter fileWriter = new PrintWriter (mStorage);
-		for (ListIterator<Score> li = mHighScores.listIterator(); li.hasNext(); )
+		assert (!super.isLocked());
+		if (!super.isLocked())
 		{
-			Score write = li.next();
-			fileWriter.println (write.getScore() + "," + write.getName());
+			super.lock();
+			insertCurrentToList();
+			PrintWriter fileWriter = new PrintWriter (mStorage);
+			fileWriter.println (getNumberEntries());
+			for (ListIterator<Score> li = mHighScores.listIterator(); li.hasNext(); )
+			{
+				Score write = li.next();
+				fileWriter.println (write.getScore() + " " + write.getName());
+			}
+			fileWriter.close();
 		}
-		fileWriter.close();
 	}
 	
+	/**
+	 * @return number of entries of the high score list the object maintains
+	 */
+	public int getNumberEntries()
+	{
+		return mEntries;
+	}
+	
+	/**
+	 * @param index index of score object in high score list
+	 * @return clone of score at index
+	 */
+	public Score getScore (int index)
+	{
+		return mHighScores.get(index).clone();
+	}
+	
+	//if possible inserts current score into sorted array list
 	private void insertCurrentToList()
 	{
 		int iComp = 0;
@@ -78,6 +140,8 @@ public class HScore extends Score
 		}
 	}
 	
+	//to clear one entry, lower high scores are copied to the next entry
+	//the last entry is erased
 	private void copyScoresDown (int i)
 	{
 		for (int cCopy = mHighScores.size() - 2; cCopy >= i; cCopy--)
@@ -88,6 +152,7 @@ public class HScore extends Score
 	
 	private ArrayList <Score> mHighScores;
 	private File mStorage;
+	private int mEntries;
 	/*
 	private int hScore1;
 	private int hScore2;

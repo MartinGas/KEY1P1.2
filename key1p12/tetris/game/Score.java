@@ -1,6 +1,6 @@
 package key1p12.tetris.game;
 
-public class Score implements Comparable <Score>
+public class Score implements Comparable <Score>, Cloneable
 {
 	/**
 	 * Creates empty score
@@ -37,6 +37,20 @@ public class Score implements Comparable <Score>
 		mScore = score;
 		mName = name;
 		mLock = true;
+	}
+	
+	
+	public Score clone()
+	{
+		return new Score (mScore, mName, mScoreComputer, mLock);
+	}
+	
+	/**
+	 * @return true if object is locked, false otherwise
+	 */
+	public boolean isLocked()
+	{
+		return mLock;
 	}
 	
 	/**
@@ -84,6 +98,7 @@ public class Score implements Comparable <Score>
 	 */
 	public void increaseScore (int rowsCleared)
 	{
+		assert (!mLock);
 		if (!mLock)
 			mScore += mScoreComputer.calculateScore (rowsCleared);
 	}
@@ -96,6 +111,20 @@ public class Score implements Comparable <Score>
 		mLock = true;
 	}
 	
+	/**
+	 * clone constructor
+	 * @param mScore2 score of the object to be cloned
+	 * @param name name of the object to be cloned
+	 * @param scoreComputer score computer object used by object to be cloned
+	 * @param lock lock flag of object to be cloned
+	 */
+	private Score (long mScore2, String name, ScoreCountable scoreComputer, boolean lock)
+	{
+		mScore = mScore2;
+		mName = name;
+		mScoreComputer = scoreComputer.clone();
+		
+	}
 	
 	private ScoreCountable mScoreComputer;
 	private long mScore;
