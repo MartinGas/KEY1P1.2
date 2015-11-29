@@ -1,41 +1,45 @@
 package key1p12.tetris.game;
 
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
-import Direction.*;
+import java.awt.event.*;
 
 
-public class HumanPlayer implements KeyListener extends Player{
+public class HumanPlayer implements Player
+{
 
-	private String name;
-	private direction move;
-	
-	public Player(String name){
-		this.name = name;
+	public class InputListener extends KeyAdapter
+	{
+		public void KeyPressed (KeyEvent e)
+		{
+			if (e.getKeyCode() == KeyEvent.VK_LEFT) {
+				mMove = GameMove.MLEFT;
+			}
+			if (e.getKeyCode() == KeyEvent.VK_RIGHT) {
+				mMove = GameMove.MRIGHT;
+	        }
+			if (e.getKeyCode() == KeyEvent.VK_UP) {
+				mMove = GameMove.TURN;
+	        }
+			if (e.getKeyCode() == KeyEvent.VK_SPACE){
+				mMove = GameMove.FALL; 
+			}
+		}
 	}
 	
-	public void KeyPressed(KeyEvent e){
-		if (e.getKeyCode() == KeyEvent.VK_LEFT) {
-			this.move = GameMove.MLEFT;
-		}
-		if (e.getKeyCode() == KeyEvent.VK_RIGHT) {
-			this.move = GameMove.MRIGHT;
-        }
-		if (e.getKeyCode() == KeyEvent.VK_UP) {
-			this.move = GameMove.TURN;
-        }
-		if (e.getKeyCode() == KeyEvent.VK_SPACE){
-			this.move = GameMove.FALL; 
-		}
-    }
+	public HumanPlayer (String name)
+	{
+		mName = name;
+	}
         
-	public Direction getMove(){
-		Direction temp = move;
-		this.move = null;
+	public GameMove getMove(){
+		GameMove temp = mMove;
+		mMove = null;
 		return temp;
     }
 	
 	public String getName(){
-		return name;
+		return mName;
 	}
+	
+	private String mName;
+	private GameMove mMove;
 }	

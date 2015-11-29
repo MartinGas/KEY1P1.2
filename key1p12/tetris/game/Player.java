@@ -2,7 +2,13 @@ package key1p12.tetris.game;
 
 public interface Player
 {
+	/**
+	 * @return player's name
+	 */
 	public String getName();
 	
-	public Direction getMove();
+	/**
+	 * @return player's next move
+	 */
+	public GameMove getMove();
 }
