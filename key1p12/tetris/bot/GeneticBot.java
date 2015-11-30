@@ -6,6 +6,7 @@ import java.util.*;
 
 import key1p12.tetris.game.Direction;
 import key1p12.tetris.game.Game.SimulGame;
+import key1p12.tetris.game.GameMove;
 
 public class GeneticBot extends Bot 
 {
@@ -106,11 +107,14 @@ public class GeneticBot extends Bot
 			{
 			case 0: done = true;
 			break;
-			case 1: last = new InstructionSet (last, Direction.LEFT);
+			case 1: if (!last.checkMoveCancel (Direction.LEFT))
+						last = new InstructionSet (last, GameMove.MLEFT);
 			break;
-			case 2: last = new InstructionSet (last, Direction.RIGHT);
+			case 2: if (!last.checkMoveCancel (Direction.RIGHT))
+						last = new InstructionSet (last, GameMove.MRIGHT);
 			break;
-			case 3: last = new InstructionSet (last, Direction.UP);
+			case 3: if (!last.checkRotateDuplicate())
+						last = new InstructionSet (last, GameMove.TURN);
 			break;
 			}
 		}

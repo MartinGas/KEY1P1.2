@@ -79,10 +79,10 @@ public abstract class Bot implements Player
 	 * @param state current state of game
 	 * @return direction pentomino should move to
 	 */
-	public Direction getMove()
+	public GameMove getMove()
 	{
 		assert (!mIdealMove.isEmpty());
-		Direction nextMove = mIdealMove.getMove();
+		GameMove nextMove = mIdealMove.getMove();
 		mIdealMove.eraseHead();
 		return nextMove;
 	}
@@ -100,8 +100,10 @@ public abstract class Bot implements Player
 		 */
 		public InstructionSet (SimulGame state)
 		{
-			mMoveQueue = new LinkedList <Direction> ();
+			mMoveQueue = new LinkedList <GameMove> ();
 			mState = state.clone();
+			mMoveDirection = Direction.NONE;
+			mRemainRotations = Pentomino.generateRotations (state.getUsedPent()).size() - 1;
 			mPScore = 0;
 			mMoveOccurred = false;
 		}
@@ -112,9 +114,11 @@ public abstract class Bot implements Player
 		 */
 		public InstructionSet (InstructionSet lastGen)
 		{
-			mMoveQueue = new LinkedList <Direction> ();
+			mMoveQueue = new LinkedList <GameMove> ();
 			assert (lastGen.moveExecuted()):
 			mState = lastGen.mState.clone();
+			mMoveDirection = Direction.NONE;
+			mRemainRotations = Pentomino.generateRotations (lastGen.mState.getUsedPent()).size() - 1;
 			mPScore = 0;
 			mMoveOccurred = false;
 		}
@@ -124,18 +128,26 @@ public abstract class Bot implements Player
 		 * @param origin instruction set to be extended
 		 * @param move move to extend origin
 		 */
-		public InstructionSet (InstructionSet origin, Direction move)
+		public InstructionSet (InstructionSet origin, GameMove move)
 		{
-			assert (move == Direction.LEFT || move == Direction.RIGHT || move == Direction.UP);
+			assert (move == GameMove.MRIGHT || move == GameMove.MLEFT || move == GameMove.TURN);
 			assert (!origin.moveExecuted());
-			mMoveQueue = new LinkedList <Direction> (origin.mMoveQueue);
+			mMoveQueue = new LinkedList <GameMove> (origin.mMoveQueue);
 			mMoveQueue.add (move);
 			mState = origin.mState.clone();
+			mMoveDirection = origin.mMoveDirection;
+			mRemainRotations = origin.mRemainRotations;
 			switch (move)
 			{
-			case LEFT:
-			case RIGHT: mState.move (move); break;
-			case UP: mState.pentRotate(); break;
+			case MLEFT: mState.move (Direction.LEFT);
+						mMoveDirection = Direction.LEFT;
+						break;
+			case MRIGHT: mState.move (Direction.RIGHT); 
+						mMoveDirection = Direction.RIGHT;
+						break;
+			case TURN: 	mState.pentRotate(); 
+						--mRemainRotations;
+						break;
 			default: break;
 			}
 			mPScore = 0;
@@ -176,7 +188,7 @@ public abstract class Bot implements Player
 		/**
 		 * @return First element of move queue
 		 */
-		public Direction getMove()
+		public GameMove getMove()
 		{
 			assert (!isEmpty());
 			return mMoveQueue.getFirst();
@@ -216,7 +228,17 @@ public abstract class Bot implements Player
 		public boolean checkMove (Direction d)
 		{
 			assert (!moveExecuted());
+			assert (d == Direction.LEFT || d == Direction.RIGHT);
 			return mState.checkMove(d);
+		}
+		
+		/**
+		 * @param d direction to check for
+		 * @return true if there is a move in the move queue that cancels the effect of moving in d
+		 */
+		public boolean checkMoveCancel (Direction d)
+		{
+			return (d != mMoveDirection);
 		}
 		
 		/**
@@ -229,8 +251,18 @@ public abstract class Bot implements Player
 			return mState.checkRotate(d);
 		}
 		
-		private LinkedList <Direction> mMoveQueue;
+		/**
+		 * @return true if rotating the pentomino reverts the pentomino to a previous state
+		 */
+		public boolean checkRotateDuplicate()
+		{
+			return (mRemainRotations  <= 0);
+		}
+		
+		private LinkedList <GameMove> mMoveQueue;
 		private Game.SimulGame mState;
+		private Direction mMoveDirection;
+		private int mRemainRotations;
 		private int mPScore;
 		private boolean mMoveOccurred;
 	}

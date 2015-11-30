@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 
+import key1p12.tetris.game.GameMove;
 import key1p12.tetris.game.Direction;
 import key1p12.tetris.game.Game.SimulGame;
 
@@ -35,22 +36,41 @@ public class GreedyBot extends Bot {
 	 */
 	public ArrayList <InstructionSet> genPossibleMoves (InstructionSet noMove)
 	{
+		//generate instruction sets for every possible rotation and store number of generated instruction sets
+		ArrayList <InstructionSet> basicRotations = new ArrayList <InstructionSet>();
+		boolean rotDupl = false;
+		do
+		{
+			if (basicRotations.isEmpty())
+				basicRotations.add (noMove);
+			else
+			{
+				InstructionSet last = basicRotations.get (basicRotations.size() - 1);
+				if (!last.checkRotateDuplicate())
+					basicRotations.add (new InstructionSet (last, GameMove.TURN));
+				else
+					rotDupl = true;
+			}
+		} while (rotDupl);
+		
 		//stores possible moves as InstructionSets
 		ArrayList <InstructionSet> pblts = new ArrayList <InstructionSet>();
-		//TODO make use of number of rotations
-		final int rotations = 4;
-		//add InstrucionSet == empty set
-		pblts.add (noMove);
-		//generate all InstructionSets moving to the left
-		while (pblts.get (pblts.size()).checkMove(Direction.LEFT))
-			pblts.add (new InstructionSet (pblts.get (pblts.size()), Direction.LEFT));
-		//generate all InstructionSets moving to the right
-		if (noMove.checkMove(Direction.RIGHT))
+		for (InstructionSet bRot : basicRotations)
 		{
-			pblts.add (new InstructionSet (noMove, Direction.RIGHT));
-			while (pblts.get (pblts.size()).checkMove(Direction.RIGHT))
-				pblts.add (new InstructionSet (pblts.get (pblts.size()), Direction.RIGHT));
+			//add basic rotation
+			pblts.add (bRot);
+			//generate all moves to the left based on basic rotation
+			while (pblts.get (pblts.size() - 1).checkMove (Direction.LEFT))
+				pblts.add (new InstructionSet (pblts.get (pblts.size() - 1), GameMove.MLEFT));
+			//generate all moves to the right based on basic rotation
+			if (bRot.checkMove (Direction.RIGHT))
+			{
+				pblts.add (new InstructionSet (bRot, GameMove.MRIGHT));
+				while (pblts.get (pblts.size() - 1).checkMove (Direction.RIGHT))
+					pblts.add (new InstructionSet (pblts.get (pblts.size() - 1), GameMove.MRIGHT));
+			}
 		}
+		
 		//apply moves for each InstructionSet
 		for (InstructionSet pbl : pblts)
 			pbl.doMove();
