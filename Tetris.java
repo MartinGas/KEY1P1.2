@@ -4,6 +4,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 
@@ -24,7 +25,7 @@ public class Tetris
 	public final static String iconImgPath = "res/image/appIcon.png";
 	public final static String hsFilePath = "res/hscores.txt";
 	
-	public final static int mBOARD_COLS = 5, mBOARD_ROWS = 15;
+	public final static int mBOARD_COLS = 5, mBOARD_ROWS = 15, mHSLIST_ENTRIES = 10;
 	
 	public static void main (String args[])
 	{
@@ -57,19 +58,11 @@ public class Tetris
 		}
 	}
 	
-	public class BackToMainMenuListener implements ActionListener
+	public class LaunchGameSetupListener implements ActionListener
 	{
 		public void actionPerformed (ActionEvent e)
 		{
-			//go back to main menu
-		}
-	}
-	
-	public class LaunchGameListener implements ActionListener
-	{
-		public void actionPerformed (ActionEvent e)
-		{
-			//start the game
+			mGui.showDialog (TetrisGui.ScreenType.SETUP);
 		}
 	}
 	
@@ -77,7 +70,7 @@ public class Tetris
 	{
 		public void actionPerformed (ActionEvent e)
 		{
-			//display high score list
+			mGui.showDialog (TetrisGui.ScreenType.HIGHSCORE);
 		}
 	}
 	
@@ -90,30 +83,65 @@ public class Tetris
 		}
 	}
 	
+	public class GameSetupListener extends TetrisGui.GameSetupListener
+	{
+		public void actionPerformed (ActionEvent e) 
+		{
+			//create player
+/*			Player player = null;
+			if (super.getPlayerType() == TetrisGui.PlayerType.HUMAN)
+				player = new HumanPlayer(super.getPlayerName());*/
+			/*else
+				player = <bot constructors>*/
+			//create & load high score
+/*			HScore scores = null;
+			try
+			{
+				File hsFile = new File (hsFilePath);
+				if (!hsFile.exists())
+					HScore.generateHighScoreFile(hsFile, mHSLIST_ENTRIES);
+				scores = new HScore(hsFile, player.getName(), new ExponentialScore(2, 1, 1));
+			}
+			//if generating the high score file does not work
+			catch (IOException e1) 
+			{
+				
+			}
+			mGui.setUpHighScorePanel(scoreList);
+			//create board
+			Board gameBoard = new Board (super.getInputWidth(), super.getInputHeight());
+			//create pentominoes
+			ArrayList <Pentomino> pentsToUse = Pentomino.createsPentList();
+			//create game
+			mGame = new Game(gameBoard, pentsToUse, player, scores);
+			
+			//mGui.showPanel (TetrisGui.ScreenType.GAME);
+			//mGame.play();*/
+			mGui.setVisible (false);
+			mGui.dispose();
+		}
+	}
+	
 	
 	
 	//public section
+	/**
+	 * Sets up gui (except for high score panel)
+	 * @throws IOException
+	 */
 	public Tetris () throws IOException
 	{
 		//construct gui
 		BufferedImage iconImg = ImageIO.read(new File (iconImgPath));
 		mGui = new TetrisGui (mMAIN_FRAME_DIM, mCAPTION, iconImg);
-		//lauch main menu
-		
-		//construct player
-		
-		
-		//construct highscore
-		//construct game board
-		Board tetrisBoard = new Board (mBOARD_COLS, mBOARD_ROWS);
-		//construct list of pentominoes
-		ArrayList <Pentomino> pentList = Pentomino.createsPentList();
-		//construct game
-		
 		mGui.setUpGamePanel (mGame, new PauseButtonListener());
-		mGui.setUpMainMenuPanel(playListener, hsListener, quitListener);
+		mGui.setUpMainMenuPanel(new LaunchGameSetupListener(), new LaunchHSListener(), new QuitGameListener());
+		mGui.setUpPauseMenuPanel(new ResumeButtonListener(), new QuitGameListener());
+		mGui.setUpGameSetupPanel(new GameSetupListener());
 		
-		//add player listener
+		//lauch main menu
+		mGui.showPanel (TetrisGui.ScreenType.START);
+		mGui.setVisible (true);
 		
 		/*control flow:
 		*launch main menu

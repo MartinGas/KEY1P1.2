@@ -31,7 +31,7 @@ public class Score implements Comparable <Score>, Cloneable
 	 * @param score score
 	 * @param name player who scored score
 	 */
-	public Score (int score, String name)
+	public Score (long score, String name)
 	{
 		mScoreComputer = null;
 		mScore = score;

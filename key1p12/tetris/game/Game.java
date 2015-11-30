@@ -103,14 +103,15 @@ public class Game implements Cloneable
 	//add to pending changes file, once it exists
 	public final long mFALL_TIME = 1500;
 	//Constructors
-	public Game(Board initBoard, /*Hscore currentHScores,*/ ArrayList<Pentomino> pieces)
+	public Game(Board initBoard, ArrayList<Pentomino> pieces, Player player, HScore currentHScores)
 	{
 		mFallTimer = new Timer (mFALL_TIME);
 		
 		field = initBoard.clone();
 		//look for nicer solution
 		blocks = (ArrayList<Pentomino>)pieces.clone();
-		//highScore = currentHScores;
+		mPlayer = player;
+		mHighScore = currentHScores;
 		mListeners = new HashMap <GameAction, ArrayList <IGameListener>>();
 		mIsOver = false;
 		mIsPaused = true;
@@ -167,7 +168,7 @@ public class Game implements Cloneable
 	 */
 	public Score getHighScore()
 	{
-		return mHighScore.getHighScore();
+		return mHighScore.getScore(0);
 	}
 	
 	/**
@@ -175,7 +176,7 @@ public class Game implements Cloneable
 	 */
 	public Score getCurrScore()
 	{
-		return mHighScore.getCurrScore();
+		return new Score (mHighScore.getScore(), mHighScore.getName());
 	}
 	
 	/**
@@ -631,8 +632,11 @@ public class Game implements Cloneable
 	//Contains a copy of Field WITHOUT pentUsed placed
 	private Board copyField;
 	
+	//holds reference to player playing game
+	private Player mPlayer;
+	
 	//Contains the list of highscores
-	//private HScore highScore;
+	private HScore mHighScore;
 	
 	//Contains all the tetris pieces
 	private ArrayList<Pentomino> blocks;
