@@ -151,6 +151,38 @@ public class Pentomino implements Cloneable
 		}
 		return pentList;
 	}
+	
+	/**
+	 * @param pent pentomino which should be rotated
+	 * postcondition: pent is not included in ArrayList returned
+	 * @return all rotated versions of pent
+	 */
+	public static ArrayList <Pentomino> generateRotations (Pentomino pent)
+	{
+		ArrayList<Pentomino> storeRotations = new ArrayList<Pentomino>();
+		Pentomino clone = pent.clone();
+		do 
+		{	
+			storeRotations.add (clone);
+			clone = clone.clone();
+			clone.rotate();
+		} while  (!storeRotations.get (0).equals (clone));
+		return storeRotations;
+	}
+	
+	
+	public static ArrayList <Pentomino> generateFlips (Pentomino pent)
+	{
+		ArrayList <Pentomino> storeFlips = new ArrayList <Pentomino>();
+		Pentomino clone = pent.clone();
+		do
+		{
+			storeFlips.add (clone);
+			clone = clone.clone();
+			clone.flip();
+		} while (!storeFlips.get (0).equals (clone));
+		return storeFlips;
+	}
 
 	/** We rotated and fliped all the pentominoes and stored them in the arrayList */
 	public static ArrayList<ArrayList<Pentomino>> generateVersions(ArrayList<Pentomino> listofPent) {
