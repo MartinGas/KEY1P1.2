@@ -32,8 +32,10 @@ public class TetBoardPanel extends JPanel
 	 */
 	public TetBoardPanel (Game state)
 	{
-		//initialize data members
-		//set layout
+		int width = state.getWidth();
+		int height = state.getHeight();
+		JPanel Board = new JPanel();
+		Board.setLayout(new GridLayout(height, width));
 	}
 	
 	/**
@@ -42,8 +44,35 @@ public class TetBoardPanel extends JPanel
 	 */
 	public void update (Game state)
 	{
-		
+		columns = state.getWidth();
+		rows = state.getHeight();
+		for (i=0, i<columns, i++)
+		{
+			for (j=0,j<rows, j++)
+			{
+				(mBlockMat.get(i).get(j)).setState(state.getElementAndPent(i,j));
+			}
+		}
 	}
+	
+	public void setup(Hashmap <Integer, Color> colMap)
+	{
+		Block blocks = new Block(colMap);
+		//Add blocks to current panel
+		this.add(blocks);
+		ArrayList<Blocks> temp= new ArrayList<Blocks>();
+		for (i=0, i<rows, i++)
+		{
+			temp.set(blocks);
+			mBlockMat.add(temp);
+		}
+		//This is probably wrong. What Im looking to do is add "columns" amount 
+		//of blocks to temp (not sure how to do that). And then add temp to mBlockMat
+		//and repeat the process "rows" amount of times
+
+	
+	}
+	
 	
 	/**
 	 * Paint component
@@ -51,9 +80,11 @@ public class TetBoardPanel extends JPanel
 	 */
 	public void paint (Graphics g)
 	{
-		
+		Graphics2D g2 = (Graphics2D) g;
+	    Blocks.draw(g2);
 	}
 	
 	//stores matrix of blocks representing board
 	ArrayList <ArrayList <Block>> mBlockMat;
+	int rows, columns;
 }
