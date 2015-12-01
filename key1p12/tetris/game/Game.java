@@ -122,7 +122,7 @@ public class Game implements Cloneable
 	/**@return Gives the highscore including the current game*/
 	//Plays the game
 	
-	public /*HScore*/void play() 
+	public void play() 
 	{
 		if (isGamePaused())
 		{
@@ -140,26 +140,20 @@ public class Game implements Cloneable
 		if (isGameOver())
 		{
 			pentFaller();
-			//get user input once player class is done
-			//select random move instead
-			int randMove = genMove.nextInt(3);
-			Direction randDirec = null;
-			switch (randMove)
+			GameMove playerInput = mPlayer.getMove();
+			switch (playerInput)
 			{
-			case 0: randDirec = Direction.LEFT;
+			case MLEFT:	move (Direction.LEFT);
 			break;
-			case 1: randDirec = Direction.RIGHT;
+			case MRIGHT: move (Direction.RIGHT);
 			break;
-			case 2: randDirec = Direction.DOWN;
+			case TURN: turn(Direction.RIGHT);
 			break;
-			}
-			assert (randDirec != null);
-			//apply move
-			if (randMove < 2 && checkMove (randDirec))
-				move (randDirec);
-			else if (randMove == 2)
-				fallPlace();
-				
+			case FALL: fallPlace();
+			break;
+			default: assert (false);
+				break;
+			}		
 		}
 	}
 	
@@ -386,7 +380,7 @@ public class Game implements Cloneable
 	 */
 	private void move(Direction direc) 
 	{
-		assert direc == Direction.LEFT || direc == Direction.RIGHT || direc == Direction.DOWN;
+		assert (direc == Direction.LEFT || direc == Direction.RIGHT || direc == Direction.DOWN);
 
 		if (direc == Direction.LEFT && checkMove(Direction.LEFT))
 			pentPosition.addX(-1);
@@ -455,21 +449,23 @@ public class Game implements Cloneable
 	 */
 	private void rowClearer() 
 	{
-		boolean clearHappened = false;
+		int cRowsCleared = 0;
 		int cRow = field.getHeight() - 1;
 		while (cRow >= 0 && !field.isRowEmpty(cRow))
 		{
 			while (field.isRowFilled (cRow))
 			{
-				if (!clearHappened)
-					clearHappened = true;
+				cRowsCleared++;
 				field.clearRow (cRow);
 				rowMover (cRow);
 			}
 			--cRow;
 		}
-		if (clearHappened)
+		if (cRowsCleared > 0)
+		{
+			mHighScore.increaseScore (cRowsCleared);
 			notifyListeners (GameAction.CLEAR);
+		}
 	}
 	
 	/**@return void

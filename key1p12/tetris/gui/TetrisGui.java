@@ -80,7 +80,7 @@ public class TetrisGui extends JFrame
 	{
 		setSize(windowSize);
 		setTitle (caption);
-		setIconImage(icon);
+		//TODO setIconImage(icon);
 	}
 	
 	public void setUpGamePanel (Game state, ActionListener pauseButtonListener)
@@ -192,11 +192,15 @@ public class TetrisGui extends JFrame
 			assert (mMainMenuPanel != null);
 			swapIn = mMainMenuPanel;
 			break;
+		default: assert (false);
+			break;
 		}
 		
 		removeAll();
+		swapIn.setSize (getWidth(), getHeight());
 		add (swapIn);
-		revalidate();
+		pack();
+		getContentPane().revalidate();
 		repaint();
 	}
 	
