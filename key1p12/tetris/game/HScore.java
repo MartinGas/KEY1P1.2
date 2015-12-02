@@ -70,13 +70,13 @@ public class HScore extends Score
 					int score = scanner.nextInt();
 					String name = scanner.next();
 					mHighScores.add (new Score (score, name));
-					System.out.print ("load new score");
-					System.out.println (mHighScores.get (mHighScores.size() - 1).toString());
+					//System.out.print ("load new score");
+					//System.out.println (mHighScores.get (mHighScores.size() - 1).toString());
 				}
 				else
 				{
 					mHighScores.add (new Score());
-					System.out.println ("create empty score");
+					//System.out.println ("create empty score");
 				}
 			}
 		}

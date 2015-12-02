@@ -120,9 +120,13 @@ public class Score implements Comparable <Score>, Cloneable
 	 */
 	private Score (long mScore2, String name, ScoreCountable scoreComputer, boolean lock)
 	{
+		assert (scoreComputer != null || lock);
 		mScore = mScore2;
 		mName = name;
-		mScoreComputer = scoreComputer.clone();
+		if (scoreComputer != null)
+			mScoreComputer = scoreComputer.clone();
+		else
+			mScoreComputer = null;
 		
 	}
 	

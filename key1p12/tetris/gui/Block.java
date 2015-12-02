@@ -22,7 +22,7 @@ public class Block extends JComponent
 	 */
 	public Color getState()
 	{
-		
+		return mColor;
 	}
 	
 	/**
