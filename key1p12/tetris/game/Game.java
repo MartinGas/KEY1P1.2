@@ -132,6 +132,8 @@ public class Game implements Cloneable
 		//if pentomino is at the bottom
 		if (!checkMove (Direction.DOWN))
 		{
+			//place the pentomino on the board first
+			placer();
 			rowClearer();
 			pentPicker();
 			if (gameOverChecker())
@@ -233,9 +235,9 @@ public class Game implements Cloneable
 			//Get the int position of left top if moved to the right
 			Position right = new Position (pentPosition.getX(), pentPosition.getY());
 			right.addX (1);
-			int rPos = right.getPosNum(copyField.getHeight());
+			int rPos = right.getPosNum(field.getHeight());
 			//Check if it fits
-			if (copyField.pentFits(pentClone, rPos))
+			if (field.pentFits(pentClone, rPos))
 			{
 				return true;
 			}
@@ -247,22 +249,9 @@ public class Game implements Cloneable
 			//Get the int position of left top if moved to the left
 			Position left = new Position (pentPosition.getX(), pentPosition.getY());
 			left.addX (-1);
-			int lPos = left.getPosNum(copyField.getHeight());
+			int lPos = left.getPosNum(field.getHeight());
 			//Check if it fits
-			if (copyField.pentFits(pentClone, lPos))
-			{
-				return true;
-			}
-			return false;
-		}
-		if (direc == Direction.DOWN)
-		{
-			//Get the int position of left top if moved down
-			Position down = new Position (pentPosition.getX(), pentPosition.getY());
-			down.addY (1);
-			int dPos = down.getPosNum(copyField.getHeight());
-			//Check if it fits
-			if (copyField.pentFits(pentClone, dPos))
+			if (field.pentFits(pentClone, lPos))
 			{
 				return true;
 			}
@@ -287,7 +276,7 @@ public class Game implements Cloneable
 	 */
 	public boolean checkRotate(Direction direc)
 	{
-		if (direc == Direction.RIGHT)
+		if (direc == Direction.UP)
 		{
 			//Clone Pentomino and rotate clockwise
 			Pentomino pentClone = pentUsed.clone();
@@ -296,10 +285,8 @@ public class Game implements Cloneable
 			//Check if this rotated pent can fit
 			if (field.pentFits (pentClone, pentPosition.getPosNum(field.getHeight())))
 			{
-				System.out.println("rotated");
 				return true;
 			}
-			System.out.println("not rotated");
 			return false;
 		}
 		return false;
@@ -315,10 +302,8 @@ public class Game implements Cloneable
 		//Checks if the pentomino can even be placed
 		if (field.pentFits(pentUsed, pos))
 		{
-			//System.out.println("Can still be placed");
 			return false;
 		}
-		//System.out.println("Can't be placed");
 		return true;
 	}
 	
@@ -422,8 +407,7 @@ public class Game implements Cloneable
 	{
 		while (this.checkMove(Direction.DOWN))
 			this.move(Direction.DOWN);
-		//place pentomino on the board
-		field.placePent(pentUsed, pentPosition.getPosNum(field.getHeight()));
+		placer();
 		notifyListeners (GameAction.FALL);
 	}
 	
@@ -433,12 +417,10 @@ public class Game implements Cloneable
 	//Maybe consider "smart placing" of initial pentomino
 	public void pentPicker() 
 	{
-		//Saves board in previous state
-		copyField = field.clone();
 		mFallTimer.reset();
 		Random random = new Random();
 		int index = random.nextInt(blocks.size());
-		pentUsed = blocks.get(11);
+		pentUsed = blocks.get(index);
 		pentPosition = new Position((int)Math.ceil(field.getWidth() / 2),0);
 		notifyListeners (GameAction.PICK);
 	}
@@ -484,12 +466,6 @@ public class Game implements Cloneable
 		field.clearRow(lastLineClear);
 	}
 	
-	public void mutateMove(Direction direc) 
-	{
-			this.move(direc);
-			//this.mutatePlace();
-	}
-	
 	/**
 	 * Notifies all listeners sensitive to event
 	 * @param event event that occurred
@@ -511,33 +487,10 @@ public class Game implements Cloneable
 		mIsOver = true;
 	}
 	
-	/**@param int Takes left top cell of the matrix the pentomino is in (not the left top cell of the pentomino) as an int
-	 * @return new position of left top after 'smart' rotating*/
-	public void mutateRotate(Direction direc) 
-	{
-			//turn pentomino
-			this.turn(direc);
-			
-			//Change the position of turned pentomino
-			//pentPosition = this.smartRotate();
-			//this.mutatePlace();
-		
-	}
-	
-	public void mutatePicker() 
-	{
-		this.pentPicker();
-		gameOverChecker();
-		//mutatePlace();
-	}
-	
-	public void mutatePlace()
+	public void placer()
 	{
 		int pos = pentPosition.getPosNum(field.getHeight());
-		//Remove copyField later after testing
-		Board temp = copyField.clone();
-		temp.placePent(pentUsed, pos);
-		field = temp;
+		field.placePent(pentUsed, pos);
 	}
 	
 	/** @return position of left top of current pentomino
@@ -602,31 +555,9 @@ public class Game implements Cloneable
 		return null;
 	}
 	
-	//Testing method
-	public void printGame()
-	{
-		field.printBoard();
-	}
-	
-	public void fall() 
-	{
-		pentFaller();
-	}
-	public void rowClearMove() 
-	{
-		rowClearer();
-		rowMover(4);
-	}
-	public void fallPlacer() 
-	{
-		this.fallPlace();
-	}
 	
 	//Contains a Board
 	private Board field;
-	
-	//Contains a copy of Field WITHOUT pentUsed placed
-	private Board copyField;
 	
 	//holds reference to player playing game
 	private Player mPlayer;
