@@ -33,20 +33,9 @@ public class Block extends JComponent
 	public Color getColor(Integer key)
 	{
 		//get value from map if key is defined
-		if (mColMap.containsKey (key))
-			return mColMap.get (key);
-		//generate new value if key is undefined
-		Random genRgb = new Random();
-		//generate random color: r, g, b values as multiples of 15 (15 * 17 = 255)
-		Color randCol = null;
-		do
-		{
-			//magic numbers => hard to understand & improve!			
-			randCol = new Color (genRgb.nextInt (18) * 15, genRgb.nextInt (18) * 15, genRgb.nextInt (18) * 15);
-		} while (mColMap.containsValue (randCol));
-					
-		mColMap.put (key, randCol);
-		return randCol;
+		if (!mColMap.containsKey (key))
+			addNewKey (key);
+		return mColMap.get (key);
 	}
 	
 	/**
@@ -55,7 +44,7 @@ public class Block extends JComponent
 	 */
 	public void setState (int cellNum)
 	{
-		mColor = mColMap.get(cellNum);
+		mColor = getColor (cellNum);
 	}
 	
 	/**
@@ -66,7 +55,27 @@ public class Block extends JComponent
 	{
 		Graphics2D g2 = (Graphics2D) g;
 		g2.setColor(mColor);
-		g2.fillRect(this.getX(), this.getY(), this.getWidth(), this.getHeight());
+		g2.fillRect(0, 0, this.getWidth(), this.getHeight());
+	}
+	
+	private void addNewKey (int n)
+	{
+		int valInterval = 17, valAmount = 15;
+		
+		//generate new value if key is undefined
+		Random genRgb = new Random();
+		//generate random color: r, g, b values as multiples of 15 (15 * 17 = 255)
+		Color randCol = null;
+		do
+		{
+			//magic numbers => hard to understand & improve!
+			int red = genRgb.nextInt (valInterval + 1) * valAmount;
+			int green = genRgb.nextInt (valInterval + 1) * valAmount;
+			int blue = genRgb.nextInt (valInterval + 1) * valAmount;
+			randCol = new Color (red, green, blue);
+		} while (mColMap.containsValue (randCol));
+					
+		mColMap.put (n, randCol);
 	}
 	
 	//color map: number => color

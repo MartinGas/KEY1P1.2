@@ -3,25 +3,35 @@ package key1p12.tetris.gui;
 import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 //own imports
 import key1p12.tetris.game.*;
 
 public class TetBoardPanel extends JPanel 
 {
+	public static Color DEFAULT_GRID_COLOR = Color.magenta;
+	
 	//Listener class belonging to board panel
 	public class GameListener implements IGameListener
 	{
-
-		@Override
-		public boolean isSensitive(GameAction event) {
-			// TODO Auto-generated method stub
+		/**
+		 * @return to which game action events the listener should respond
+		 */
+		public boolean isSensitive(GameAction event) 
+		{
+			if (event == GameAction.CLEAR || event == GameAction.FALL || event == GameAction.MOVE || event == GameAction.TURN || event == GameAction.PICK)
+				return true;
 			return false;
 		}
 
-		@Override
+		/**
+		 * @para state: current state of the game
+		 * @event game action event occurring
+		 * updates the panel
+		 */
 		public void performAction(Game state, GameAction event) {
-			// TODO Auto-generated method stub
-			
+			update (state);
+			repaint();
 		}
 		
 	}
@@ -32,10 +42,20 @@ public class TetBoardPanel extends JPanel
 	 */
 	public TetBoardPanel (Game state)
 	{
-		int width = state.getWidth();
-		int height = state.getHeight();
-		JPanel Board = new JPanel();
-		Board.setLayout(new GridLayout(height, width));
+		columns = state.getWidth();
+		rows = state.getHeight();
+		mBlockMat = new ArrayList <ArrayList <Block>>();
+		mGridColor = DEFAULT_GRID_COLOR;
+		setLayout (new GridLayout (rows, columns));
+	}
+	
+	public TetBoardPanel (Board b)
+	{
+		columns = b.getWidth();
+		rows = b.getHeight();
+		mBlockMat = new ArrayList <ArrayList <Block>>();
+		mGridColor = DEFAULT_GRID_COLOR;
+		setLayout (new GridLayout (rows, columns));
 	}
 	
 	/**
@@ -44,35 +64,45 @@ public class TetBoardPanel extends JPanel
 	 */
 	public void update (Game state)
 	{
-		columns = state.getWidth();
-		rows = state.getHeight();
-		for (i=0, i<columns, i++)
+		for (int cRow = 0; cRow < rows; cRow++)
 		{
-			for (j=0,j<rows, j++)
+			for (int cCol = 0; cCol < columns; cCol++)
 			{
-				(mBlockMat.get(i).get(j)).setState(state.getElementAndPent(i,j));
+				(mBlockMat.get (cRow).get(cCol)).setState (state.getElementAndPent(cCol, cRow));
 			}
 		}
 	}
 	
-	public void setup(Hashmap <Integer, Color> colMap)
+	public void update (Board b)
 	{
-		Block blocks = new Block(colMap);
-		//Add blocks to current panel
-		this.add(blocks);
-		ArrayList<Blocks> temp= new ArrayList<Blocks>();
-		for (i=0, i<rows, i++)
+		for (int cRow = 0; cRow < rows; cRow++)
 		{
-			temp.set(blocks);
-			mBlockMat.add(temp);
+			for (int cCol = 0; cCol < columns; cCol++)
+			{
+				(mBlockMat.get (cRow).get (cCol)).setState (b.getElement (cCol, cRow));
+			}
 		}
-		//This is probably wrong. What Im looking to do is add "columns" amount 
-		//of blocks to temp (not sure how to do that). And then add temp to mBlockMat
-		//and repeat the process "rows" amount of times
-
-	
 	}
 	
+	/**
+	 * Creates necessary objects depending on colMap
+	 * @param colMap color map shared among all instances
+	 */
+	public void setup(HashMap <Integer, Color> colMap)
+	{
+		//Add blocks to current panel
+		for (int cRow = 0; cRow < rows; cRow++)
+		{
+			ArrayList <Block> temp = new ArrayList <Block>();
+			for (int cCol = 0; cCol < columns; cCol++)
+			{
+				Block block = new Block (colMap);
+				temp.add(block);
+				add (block);
+			}
+			mBlockMat.add(temp);
+		}
+	}
 	
 	/**
 	 * Paint component
@@ -80,11 +110,30 @@ public class TetBoardPanel extends JPanel
 	 */
 	public void paint (Graphics g)
 	{
+		super.paint(g);
 		Graphics2D g2 = (Graphics2D) g;
-	    Blocks.draw(g2);
+	    int distW = getWidth() / columns, distH = getHeight() / rows;
+	    
+		for (int cRow = 0; cRow < rows; cRow++)
+		{
+			g2.setColor(mGridColor);
+			g2.drawLine (cRow * distW, 0, cRow * distW, getHeight());
+			g2.drawLine (0, cRow * distH, getWidth(), cRow * distH);
+		}
 	}
 	
+	/**
+	 * @param newGridColor new grid color
+	 * makes panel use newGridColor as color for drawing the grid
+	 */
+	public void setGridColor (Color newGridColor)
+	{
+		mGridColor = newGridColor;
+	}
+	
+	
 	//stores matrix of blocks representing board
-	ArrayList <ArrayList <Block>> mBlockMat;
-	int rows, columns;
+	private ArrayList <ArrayList <Block>> mBlockMat;
+	private Color mGridColor;
+	private int rows, columns;
 }
