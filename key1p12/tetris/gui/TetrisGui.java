@@ -86,7 +86,10 @@ public class TetrisGui extends JFrame
 	public void setUpGamePanel (Game state, ActionListener pauseButtonListener)
 	{
 		mGamePanel = new JPanel (new BorderLayout());
-		mGamePanel.add (new TetStatPanel (state, pauseButtonListener), BorderLayout.NORTH);
+		TetStatPanel statPnl = new TetStatPanel (pauseButtonListener);
+		statPnl.updateCurrentScore (state.getCurrScore());
+		statPnl.updateHighScore (state.getHighScore());
+		mGamePanel.add (statPnl, BorderLayout.NORTH);
 		mGamePanel.add (new TetBoardPanel (state), BorderLayout.CENTER);
 		mGamePanel.revalidate();
 	}
@@ -170,8 +173,8 @@ public class TetrisGui extends JFrame
 	
 	public void setUpHighScorePanel (HScore scoreList)
 	{
-		HighScoreDialog hsdiag = new HighScoreDialog (scoreList, this, true);
-		hsdiag.setup();
+		HighScoreDialog hsdiag = new HighScoreDialog (this, true);
+		hsdiag.setup (scoreList);
 		hsdiag.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 		mHighScoreDialog = hsdiag; 
 	}

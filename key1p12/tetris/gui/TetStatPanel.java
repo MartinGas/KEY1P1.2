@@ -7,6 +7,7 @@ import javax.swing.*;
 
 import key1p12.tetris.game.Game;
 import key1p12.tetris.game.GameAction;
+import key1p12.tetris.game.HScore;
 import key1p12.tetris.game.Score;
 //own imports
 import key1p12.tetris.game.IGameListener;
@@ -62,6 +63,12 @@ public class TetStatPanel extends JPanel
 		this.add (maxScorePanel);
 		this.add (currScorePanel);
 		this.add (pauseButton);
+	}
+	
+	public void updateAll (HScore scoreList)
+	{
+		updateCurrentScore (new Score (scoreList.getScore(), scoreList.getName()));
+		updateHighScore (scoreList.getScore(0));
 	}
 	
 	public void updateCurrentScore (Score current)
