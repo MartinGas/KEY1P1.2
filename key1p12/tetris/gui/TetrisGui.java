@@ -72,6 +72,8 @@ public class TetrisGui extends JFrame
 		private JTextField  mNameInputField, mWidthInputField, mHeightInputField;
 	}
 	
+	public static final Dimension DIALOG_DIM = new Dimension (300, 450);
+	
 	public enum PlayerType {HUMAN, BOT};
 	
 	public enum ScreenType {GAME, SETUP, PAUSE, HIGHSCORE, START};
@@ -119,8 +121,33 @@ public class TetrisGui extends JFrame
 		mGameSetupDialog = new JDialog (this, true);
 		mGameSetupDialog.setTitle ("Game setup");
 		mGameSetupDialog.setDefaultCloseOperation (DISPOSE_ON_CLOSE);
+		mGameSetupDialog.setSize(DIALOG_DIM);
 		
 		Container cpane = mGameSetupDialog.getContentPane();
+		
+		cpane.setLayout (new GridBagLayout());
+		
+		JLabel playerDes = new JLabel ("Choose the type of player and a name if relevant");
+		JRadioButton isHuman, isBot;
+		isHuman = new JRadioButton ("Human plays", true);
+		isBot = new JRadioButton ("Bot plays", false);
+		ButtonGroup playerSelection = new ButtonGroup();
+		JTextField enterPlayerName = new JTextField ("Player's name");
+		
+		isHuman.addItemListener (setupListener);
+		
+		
+		playerSelection.add (isHuman);
+		playerSelection.add (isBot);
+		
+		JPanel playerPanel = new JPanel (new GridLayout (3, 1));
+		playerPanel.add (playerDes);
+		playerPanel.add (isHuman);
+		playerPanel.add (isBot);
+		playerPanel.add (enterPlayerName);
+		
+		
+		
 		cpane.setLayout (new GridLayout (1,1));
 		
 		JLabel playerDes = new JLabel ("Choose the type of player and a name if relevant");
@@ -159,6 +186,7 @@ public class TetrisGui extends JFrame
 	{
 		mPauseMenuDialog = new JDialog (this, true);
 		mPauseMenuDialog.setTitle ("Game paused");
+		mPauseMenuDialog.setSize (DIALOG_DIM);
 		mPauseMenuDialog.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 		mPauseMenuDialog.getContentPane().setLayout (new GridLayout ());
 		
@@ -174,8 +202,12 @@ public class TetrisGui extends JFrame
 	public void setUpHighScorePanel (HScore scoreList)
 	{
 		HighScoreDialog hsdiag = new HighScoreDialog (this, true);
-		hsdiag.setup (scoreList);
 		hsdiag.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+		hsdiag.setTitle ("high scores");
+		hsdiag.setSize(DIALOG_DIM);
+		hsdiag.setup (scoreList);
+		
+		hsdiag.update (scoreList);
 		mHighScoreDialog = hsdiag; 
 	}
 	
@@ -199,11 +231,9 @@ public class TetrisGui extends JFrame
 			break;
 		}
 		
-		removeAll();
-		swapIn.setSize (getWidth(), getHeight());
+		getContentPane().removeAll();
 		add (swapIn);
-		pack();
-		getContentPane().revalidate();
+		revalidate();
 		repaint();
 	}
 	

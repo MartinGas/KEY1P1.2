@@ -21,7 +21,7 @@ public class Tetris
 	public final static Dimension mMAIN_FRAME_DIM = new Dimension (400, 700);
 	public final static String mCAPTION = new String ("Tetris!");
 	public final static String iconImgPath = "res/image/appIcon.png";
-	public final static String hsFilePath = "res/hscores.txt";
+	public final static String hsFilePath = "highscores.txt";
 	
 	public final static int mBOARD_COLS = 5, mBOARD_ROWS = 15, mHSLIST_ENTRIES = 10;
 	
@@ -68,6 +68,23 @@ public class Tetris
 	{
 		public void actionPerformed (ActionEvent e)
 		{
+			if (mGame == null)
+			{
+				try
+				{
+					File hsfile = new File (hsFilePath);
+					if (!hsfile.exists())
+						HScore.generateHighScoreFile (hsfile, mHSLIST_ENTRIES);
+					HScore hslist = new HScore (hsfile, "", new ExponentialScore(0, 0, 0));
+					mGui.setUpHighScorePanel (hslist);
+				}
+				catch (IOException eio)
+				{
+					System.out.println ("Game does not exist");
+					System.out.println ("Problem creating high score list.");
+					System.out.println (eio.getMessage());
+				}
+			}
 			mGui.showDialog (TetrisGui.ScreenType.HIGHSCORE);
 		}
 	}
@@ -106,7 +123,6 @@ public class Tetris
 		//TODOBufferedImage iconImg = ImageIO.read(new File (iconImgPath));
 		//mGui = new TetrisGui (mMAIN_FRAME_DIM, mCAPTION, iconImg);
 		mGui = new TetrisGui (mMAIN_FRAME_DIM, mCAPTION, new BufferedImage(1, 1, 1));
-		mGui.setUpGamePanel (mGame, new PauseButtonListener());
 		mGui.setUpMainMenuPanel(new LaunchGameSetupListener(), new LaunchHSListener(), new QuitGameListener());
 		mGui.setUpPauseMenuPanel(new ResumeButtonListener(), new QuitGameListener());
 		mGui.setUpGameSetupPanel(new GameSetupListener());

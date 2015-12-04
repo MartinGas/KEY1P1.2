@@ -87,6 +87,18 @@ public class HScore extends Score
 	}
 	
 	/**
+	 * Represents contents as string
+	 */
+	public String toString()
+	{
+		String out = new String();
+		out += "current score " + getScore() + " " + getName() + "\n";
+		for (Score s : mHighScores)
+			out += s.toString() + "\n";
+		return out;
+	}
+	
+	/**
 	 * locks the object and writes changes to file
 	 * @throws IOException
 	 */
