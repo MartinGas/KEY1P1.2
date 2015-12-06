@@ -1,6 +1,8 @@
 package key1p12.tetris.gui;
 
 //java API imports
+import java.util.HashMap;
+
 import java.awt.*;
 import java.awt.event.*;
 
@@ -13,33 +15,35 @@ import key1p12.tetris.game.HScore;
 
 public class TetrisGui extends JFrame 
 {	
-	public static abstract class GameSetupListener implements ActionListener, ItemListener
+	
+	public static abstract class TypeListener <TEnum> implements ItemListener
 	{
-		public void setupInputs (JTextField playerNameField, JTextField widthInputField, JTextField heightInputField)
+		public TEnum getType()
 		{
-			mNameInputField = playerNameField;
+			return mType;
+		}
+		
+		protected TEnum mType;
+	}
+	
+	public static abstract class GameSetupListener implements ActionListener
+	{
+		public void setupBoardInputs (JTextField widthInputField, JTextField heightInputField)
+		{
 			mWidthInputField = widthInputField;
 			mHeightInputField = heightInputField;
 		}
 		
-		/**
-		 * Listens to human radio box
-		 * changes state of name input box
-		 */
-		public void itemStateChanged(ItemEvent e) 
+		public void setupPlayerNameInput (JTextField nameInputField)
 		{
-			if (e.equals(ItemEvent.SELECTED))
-			{
-				mPType = PlayerType.HUMAN;
-				mNameInputField.setText ("bot chooses name");
-				mNameInputField.setEditable(false);
-			}
-			else if (e.equals(ItemEvent.DESELECTED))
-			{
-				mPType = PlayerType.BOT;
-				mNameInputField.setText ("bot chooses name");
-				mNameInputField.setEditable(false);
-			}
+			mNameInputField = nameInputField;
+		}
+		
+		public void setupTypeInput (JComboBox <PlayerType> playerTypeInput, JComboBox <BotType> botTypeInput, JComboBox <PMType> pmTypeInput)
+		{
+			mPlayerTypeInput = playerTypeInput;
+			mBotTypeInput = botTypeInput;
+			mPMTypeInput = pmTypeInput;
 		}
 	
 		/**
@@ -49,7 +53,17 @@ public class TetrisGui extends JFrame
 		
 		public PlayerType getPlayerType()
 		{
-			return mPType;
+			return (PlayerType)mPlayerTypeInput.getSelectedItem();
+		}
+		
+		public BotType getBotType()
+		{
+			return (BotType)mBotTypeInput.getSelectedItem();
+		}
+		
+		public PMType getPerfMeasureType()
+		{
+			return (PMType)mPMTypeInput.getSelectedItem();
 		}
 		
 		public String getPlayerName()
@@ -67,16 +81,23 @@ public class TetrisGui extends JFrame
 			return Integer.parseInt (mHeightInputField.getText());
 		}
 		
-		private PlayerType mPType;
-		
+		private JComboBox <PlayerType> mPlayerTypeInput;
+		private JComboBox <BotType> mBotTypeInput;
+		private JComboBox <PMType> mPMTypeInput;
 		private JTextField  mNameInputField, mWidthInputField, mHeightInputField;
 	}
 	
 	public static final Dimension DIALOG_DIM = new Dimension (300, 450);
+	public static final Color DEFAULT_BLOCK_COLOR = Color.BLACK;
 	
 	public enum PlayerType {HUMAN, BOT};
 	
+	public enum BotType {GREEDY, TREE, GENETIC};
+	
+	public enum PMType {};
+	
 	public enum ScreenType {GAME, SETUP, PAUSE, HIGHSCORE, START};
+	
 	
 	public TetrisGui (Dimension windowSize, String caption, Image icon)
 	{
@@ -91,9 +112,12 @@ public class TetrisGui extends JFrame
 		TetStatPanel statPnl = new TetStatPanel (pauseButtonListener);
 		statPnl.updateCurrentScore (state.getCurrScore());
 		statPnl.updateHighScore (state.getHighScore());
+		TetBoardPanel boardPnl = new TetBoardPanel (state);
+		HashMap <Integer, Color> sharedColMap = new HashMap <Integer, Color> ();
+		sharedColMap.put(new Integer (0), DEFAULT_BLOCK_COLOR);
+		boardPnl.setup (sharedColMap);
 		mGamePanel.add (statPnl, BorderLayout.NORTH);
-		mGamePanel.add (new TetBoardPanel (state), BorderLayout.CENTER);
-		mGamePanel.revalidate();
+		mGamePanel.add (boardPnl, BorderLayout.CENTER);
 	}
 	
 	public void setUpMainMenuPanel (ActionListener playListener, ActionListener hsListener, ActionListener quitListener)
@@ -118,6 +142,31 @@ public class TetrisGui extends JFrame
 	
 	public void setUpGameSetupPanel (GameSetupListener setupListener)
 	{	
+		int boardSizeMaxDigits = 3;
+		
+		class PlayerSelectionListener implements ItemListener
+		{
+			/**
+			 * Constructor
+			 * @param tabs panel whose state should be changed when event fired
+			 */
+			public PlayerSelectionListener (JPanel tabs)
+			{
+				mTabs = tabs;
+			}
+			
+			public void itemStateChanged (ItemEvent e) 
+			{
+				PlayerType ptype = (PlayerType)e.getItem();
+				CardLayout cl = (CardLayout) mTabs.getLayout();
+				assert (cl.getClass() == CardLayout.class);
+				cl.show (mTabs, ptype.toString());
+			}
+			
+			private JPanel mTabs;
+		}
+		
+		
 		mGameSetupDialog = new JDialog (this, true);
 		mGameSetupDialog.setTitle ("Game setup");
 		mGameSetupDialog.setDefaultCloseOperation (DISPOSE_ON_CLOSE);
@@ -127,59 +176,82 @@ public class TetrisGui extends JFrame
 		
 		cpane.setLayout (new GridBagLayout());
 		
-		JLabel playerDes = new JLabel ("Choose the type of player and a name if relevant");
-		JRadioButton isHuman, isBot;
-		isHuman = new JRadioButton ("Human plays", true);
-		isBot = new JRadioButton ("Bot plays", false);
-		ButtonGroup playerSelection = new ButtonGroup();
-		JTextField enterPlayerName = new JTextField ("Player's name");
+		JLabel playerDes = new JLabel ("Configure player");
 		
-		isHuman.addItemListener (setupListener);
+		JComboBox <BotType> botType = new JComboBox <BotType> (BotType.values());
+		JComboBox <PMType> pmType = new JComboBox <PMType> (PMType.values());
 		
+		JTextField enterPlayerName = new JTextField ("name");
+		enterPlayerName.selectAll();
+		setupListener.setupPlayerNameInput(enterPlayerName);
 		
-		playerSelection.add (isHuman);
-		playerSelection.add (isBot);
+		JPanel botConfigPanel = new JPanel (new GridLayout (2, 1));
+		botConfigPanel.add (botType);
+		botConfigPanel.add (pmType);
+		JPanel playerConfigPanel = new JPanel (new CardLayout());
+		playerConfigPanel.add (enterPlayerName, PlayerType.HUMAN.toString());
+		playerConfigPanel.add (botConfigPanel, PlayerType.BOT.toString());
 		
-		JPanel playerPanel = new JPanel (new GridLayout (3, 1));
-		playerPanel.add (playerDes);
-		playerPanel.add (isHuman);
-		playerPanel.add (isBot);
-		playerPanel.add (enterPlayerName);
+		JComboBox <PlayerType> playerType = new JComboBox <PlayerType> (PlayerType.values());
+		PlayerSelectionListener listenPlayerSelection = new PlayerSelectionListener (playerConfigPanel);
+		playerType.addItemListener (listenPlayerSelection);
+		setupListener.setupTypeInput(playerType, botType, pmType);
 		
+		JLabel boardDes = new JLabel("Configure board");
+		JTextField enterWidth = new JTextField();
+		enterWidth.setColumns (boardSizeMaxDigits);
+		JTextField enterHeight = new JTextField();
+		enterHeight.setColumns (boardSizeMaxDigits);
+		setupListener.setupBoardInputs(enterWidth, enterHeight);
 		
+		JButton startGameButton = new JButton ("start");
+		startGameButton.addActionListener(setupListener);
 		
-		cpane.setLayout (new GridLayout (1,1));
+		GridBagConstraints cDesPSelect = new GridBagConstraints();
+		cDesPSelect.gridx = 0;
+		cDesPSelect.gridy = 0;
+		cDesPSelect.gridwidth = 1;
+		cDesPSelect.gridheight = 1;
+		cDesPSelect.anchor = GridBagConstraints.PAGE_START;
 		
-		JLabel playerDes = new JLabel ("Choose the type of player and a name if relevant");
-		JRadioButton isHuman = new JRadioButton ("Human plays", true);
-		isHuman.addItemListener (setupListener);
-		JRadioButton isBot = new JRadioButton ("Bot plays", false);
-		ButtonGroup playerSelection = new ButtonGroup();
-		playerSelection.add (isHuman);
-		playerSelection.add (isBot);
-		JTextField enterPlayerName = new JTextField ("Player's name");
-		JPanel playerPanel = new JPanel (new GridLayout (3, 1));
-		playerPanel.add (playerDes);
-		playerPanel.add (isHuman);
-		playerPanel.add (isBot);
-		playerPanel.add (enterPlayerName);
+		GridBagConstraints cPTypeSelect = (GridBagConstraints) cDesPSelect.clone();
+		cPTypeSelect.gridy = 1;
+		cPTypeSelect.anchor = GridBagConstraints.CENTER;
 		
-		JLabel boardDes = new JLabel ("Select the size of the board");
-		JTextField enterWidth = new JTextField ();
-		JTextField enterHeight = new JTextField ();
-		JPanel boardPanel = new JPanel (new GridLayout (3, 1));
-		boardPanel.add (boardDes);
-		boardPanel.add (enterWidth);
-		boardPanel.add (enterHeight);
+		GridBagConstraints cPlayerSelection;
+		cPlayerSelection = (GridBagConstraints) cDesPSelect.clone();
+		cPlayerSelection.gridy = 2;
+		cPlayerSelection.gridheight = 1;
 		
-		JButton startButton = new JButton ("go!");
-		startButton.addActionListener (setupListener);
+		GridBagConstraints cDesBoardConfig = new GridBagConstraints();
+		cDesBoardConfig.gridx = 1;
+		cDesBoardConfig.gridy = 0;
+		cDesBoardConfig.gridwidth = 2;
+		cDesBoardConfig.gridheight = 1;
 		
-		mGameSetupDialog.add (playerPanel);
-		mGameSetupDialog.add (boardPanel);
-		mGameSetupDialog.add (startButton);
+		GridBagConstraints cBoardWInput;
+		cBoardWInput = (GridBagConstraints) cDesBoardConfig.clone();
+		cBoardWInput.gridy = 1;
+		cBoardWInput.gridwidth = 1;
 		
-		setupListener.setupInputs(enterPlayerName, enterWidth, enterHeight);
+		GridBagConstraints cBoardHInput;
+		cBoardHInput = (GridBagConstraints) cBoardWInput.clone();
+		cBoardHInput.gridx = 2;
+		
+		GridBagConstraints cStartButton;
+		cStartButton = new GridBagConstraints();
+		cStartButton.gridx = 1;
+		cStartButton.gridy = 2;
+		cStartButton.gridwidth = 2;
+		cStartButton.gridheight = 1;
+		
+		mGameSetupDialog.add (playerDes, cDesPSelect);
+		mGameSetupDialog.add (playerType, cPTypeSelect);
+		mGameSetupDialog.add (playerConfigPanel, cPlayerSelection);
+		mGameSetupDialog.add (boardDes, cDesBoardConfig);
+		mGameSetupDialog.add (enterWidth, cBoardWInput);
+		mGameSetupDialog.add (enterHeight, cBoardHInput);
+		mGameSetupDialog.add (startGameButton, cStartButton);
 	}
 	
 	public void setUpPauseMenuPanel (ActionListener resumeListener, ActionListener quitListener)
@@ -190,9 +262,9 @@ public class TetrisGui extends JFrame
 		mPauseMenuDialog.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 		mPauseMenuDialog.getContentPane().setLayout (new GridLayout ());
 		
-		JButton resumeButton = new JButton();
+		JButton resumeButton = new JButton ("resume");
 		resumeButton.addActionListener (resumeListener);
-		JButton quitButton = new JButton();
+		JButton quitButton = new JButton ("quit");
 		quitButton.addActionListener (quitListener);
 		
 		mPauseMenuDialog.add(resumeButton);
@@ -248,7 +320,20 @@ public class TetrisGui extends JFrame
 		break;
 		case SETUP: 		mGameSetupDialog.setVisible (true);
 		break;
-		default: 
+		}
+	}
+	
+	public void hideDialog (ScreenType diag)
+	{
+		assert (diag == ScreenType.HIGHSCORE || diag == ScreenType.PAUSE || diag == ScreenType.SETUP);
+		switch (diag)
+		{
+		case HIGHSCORE: 	mHighScoreDialog.setVisible (false);
+		break;
+		case PAUSE: 		mPauseMenuDialog.setVisible (false);
+		break;
+		case SETUP: 		mGameSetupDialog.setVisible (false);
+		break;
 		}
 	}
 	

@@ -45,6 +45,7 @@ public class Tetris
 		public void actionPerformed(ActionEvent e) 
 		{
 			Tetris.this.pauseGame();
+			mGui.showDialog (TetrisGui.ScreenType.PAUSE);
 		}
 	}
 	
@@ -53,6 +54,7 @@ public class Tetris
 		public void actionPerformed (ActionEvent e)
 		{
 			Tetris.this.resumeGame();
+			mGui.hideDialog (TetrisGui.ScreenType.PAUSE);
 		}
 	}
 	
@@ -102,11 +104,14 @@ public class Tetris
 	{
 		public void actionPerformed (ActionEvent e) 
 		{
+			constructGame (this);
+			mGui.setUpGamePanel(mGame, new PauseButtonListener());
 			
-			//mGui.showPanel (TetrisGui.ScreenType.GAME);
-			//mGame.play();*/
-			mGui.setVisible (false);
-			mGui.dispose();
+			mGui.hideDialog(TetrisGui.ScreenType.SETUP);
+			mGui.showPanel (TetrisGui.ScreenType.GAME);
+			mGame.play();
+			/*mGui.setVisible (false);
+			mGui.dispose();*/
 		}
 	}
 	
@@ -156,7 +161,7 @@ public class Tetris
 	{
 		//create player
 		Player player = null;
-		ArrayList <IGameListener> playersEars = new ArrayList <IGameListener>();
+		ArrayList <IGameListener> botsEars = new ArrayList <IGameListener>();
 		if (setup.getPlayerType() == TetrisGui.PlayerType.HUMAN)
 		{
 			HumanPlayer hplayer = new HumanPlayer(setup.getPlayerName());
@@ -166,6 +171,7 @@ public class Tetris
 		}
 		/*else
 			player = <bot constructors>*/
+		assert (player != null);
 		//create & load high score
 		HScore scores = null;
 		try
@@ -187,7 +193,8 @@ public class Tetris
 		ArrayList <Pentomino> pentsToUse = Pentomino.createsPentList();
 		//create game
 		mGame = new Game(gameBoard, pentsToUse, player, scores);
-		//TODO find a way to add gui listeners to game
+		for (IGameListener l : botsEars)
+			mGame.addListener (l);
 	}
 	
 	private void playGame()

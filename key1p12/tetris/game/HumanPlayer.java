@@ -28,11 +28,13 @@ public class HumanPlayer implements Player
 	public HumanPlayer (String name)
 	{
 		mName = name;
+		mMove = GameMove.NONE;
 	}
         
-	public GameMove getMove(){
+	public GameMove getMove()
+	{
 		GameMove temp = mMove;
-		mMove = null;
+		mMove = GameMove.NONE;
 		return temp;
     }
 	
