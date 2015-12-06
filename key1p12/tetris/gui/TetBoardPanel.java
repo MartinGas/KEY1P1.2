@@ -25,7 +25,7 @@ public class TetBoardPanel extends JPanel
 		}
 
 		/**
-		 * @para state: current state of the game
+		 * @param state: current state of the game
 		 * @event game action event occurring
 		 * updates the panel
 		 */
@@ -113,10 +113,11 @@ public class TetBoardPanel extends JPanel
 		super.paint(g);
 		Graphics2D g2 = (Graphics2D) g;
 	    int distW = getWidth() / columns, distH = getHeight() / rows;
-	    
+	    GridLayout gl = new GridLayout();
+	    g2.setColor(mGridColor);
 		for (int cRow = 0; cRow < rows; cRow++)
 		{
-			g2.setColor(mGridColor);
+			
 			g2.drawLine (cRow * distW, 0, cRow * distW, getHeight());
 			g2.drawLine (0, cRow * distH, getWidth(), cRow * distH);
 		}

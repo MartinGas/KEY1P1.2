@@ -27,6 +27,8 @@ public class Tetris
 	
 	public static void main (String args[])
 	{
+		//Game.DEBUG = true;
+		
 		Tetris app = null;
 		try
 		{
@@ -53,7 +55,7 @@ public class Tetris
 	{
 		public void actionPerformed (ActionEvent e)
 		{
-			Tetris.this.resumeGame();
+			Thread t = new Thread (new GameRunner());
 			mGui.hideDialog (TetrisGui.ScreenType.PAUSE);
 		}
 	}
@@ -109,10 +111,38 @@ public class Tetris
 			
 			mGui.hideDialog(TetrisGui.ScreenType.SETUP);
 			mGui.showPanel (TetrisGui.ScreenType.GAME);
-			mGame.play();
+			
+			Thread t = new Thread (new GameRunner());
+			t.start();
 			/*mGui.setVisible (false);
 			mGui.dispose();*/
 		}
+	}
+	
+	public class GameRunner implements Runnable
+	{
+		public void run() 
+		{
+			System.out.println ("Running game");
+			mGui.setFocusable(true);
+			while (!mGui.hasFocus())
+				mGui.requestFocus();
+			System.out.println ("game window focussed " + mGui.hasFocus());
+			if (mGame.isGamePaused())
+				mGame.play();
+			
+			while (!mGame.isGameOver() && !mGame.isGamePaused())
+			{
+				mGame.play();
+				if (!mGui.hasFocus())
+					System.out.println ("lost focus");
+				try
+				{
+					Thread.sleep(100);
+				}catch (Exception e) {}
+			}
+		}
+		
 	}
 	
 	
@@ -159,9 +189,9 @@ public class Tetris
 	 */
 	private void constructGame (TetrisGui.GameSetupListener setup)
 	{
+		ArrayList <IGameListener> gameListeners = new ArrayList <IGameListener>();
 		//create player
 		Player player = null;
-		ArrayList <IGameListener> botsEars = new ArrayList <IGameListener>();
 		if (setup.getPlayerType() == TetrisGui.PlayerType.HUMAN)
 		{
 			HumanPlayer hplayer = new HumanPlayer(setup.getPlayerName());
@@ -184,7 +214,7 @@ public class Tetris
 		//if generating the high score file does not work
 		catch (IOException e1) 
 		{
-			
+			System.err.println ("Could not generate high score file");
 		}
 		mGui.setUpHighScorePanel (scores);
 		//create board
@@ -193,16 +223,13 @@ public class Tetris
 		ArrayList <Pentomino> pentsToUse = Pentomino.createsPentList();
 		//create game
 		mGame = new Game(gameBoard, pentsToUse, player, scores);
-		for (IGameListener l : botsEars)
-			mGame.addListener (l);
+		addGameListeners (gameListeners);
 	}
 	
-	private void playGame()
+	private void addGameListeners (ArrayList <IGameListener> gameListeners)
 	{
-		while (!mGame.isGameOver() && !mGame.isGamePaused())
-		{
-			mGame.play();
-		}
+		 for (IGameListener l : gameListeners)
+			 mGame.addListener(l);
 	}
 	
 	private void pauseGame()
@@ -210,11 +237,7 @@ public class Tetris
 		mGame.pause();
 		//show pause screen
 	}
-	
-	private void resumeGame()
-	{
-		playGame();
-	}
+
 	
 	private Game mGame;
 	//private HScore mHighestScores;

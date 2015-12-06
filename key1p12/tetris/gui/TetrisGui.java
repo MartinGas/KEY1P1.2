@@ -103,6 +103,7 @@ public class TetrisGui extends JFrame
 	{
 		setSize(windowSize);
 		setTitle (caption);
+		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		//TODO setIconImage(icon);
 	}
 	
@@ -112,12 +113,16 @@ public class TetrisGui extends JFrame
 		TetStatPanel statPnl = new TetStatPanel (pauseButtonListener);
 		statPnl.updateCurrentScore (state.getCurrScore());
 		statPnl.updateHighScore (state.getHighScore());
+		
 		TetBoardPanel boardPnl = new TetBoardPanel (state);
 		HashMap <Integer, Color> sharedColMap = new HashMap <Integer, Color> ();
 		sharedColMap.put(new Integer (0), DEFAULT_BLOCK_COLOR);
 		boardPnl.setup (sharedColMap);
+		
 		mGamePanel.add (statPnl, BorderLayout.NORTH);
 		mGamePanel.add (boardPnl, BorderLayout.CENTER);
+		state.addListener (statPnl.new ScoreListener());
+		state.addListener (boardPnl.new GameListener());
 	}
 	
 	public void setUpMainMenuPanel (ActionListener playListener, ActionListener hsListener, ActionListener quitListener)
@@ -198,9 +203,9 @@ public class TetrisGui extends JFrame
 		setupListener.setupTypeInput(playerType, botType, pmType);
 		
 		JLabel boardDes = new JLabel("Configure board");
-		JTextField enterWidth = new JTextField();
+		JTextField enterWidth = new JTextField ("10");
 		enterWidth.setColumns (boardSizeMaxDigits);
-		JTextField enterHeight = new JTextField();
+		JTextField enterHeight = new JTextField("15");
 		enterHeight.setColumns (boardSizeMaxDigits);
 		setupListener.setupBoardInputs(enterWidth, enterHeight);
 		
@@ -307,6 +312,8 @@ public class TetrisGui extends JFrame
 		add (swapIn);
 		revalidate();
 		repaint();
+		requestFocus();
+		assert (isFocusOwner());
 	}
 	
 	public void showDialog (ScreenType diag)

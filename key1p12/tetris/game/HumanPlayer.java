@@ -8,8 +8,10 @@ public class HumanPlayer implements Player
 
 	public class InputListener extends KeyAdapter
 	{
-		public void KeyPressed (KeyEvent e)
+		
+		public void keyPressed (KeyEvent e)
 		{
+			
 			if (e.getKeyCode() == KeyEvent.VK_LEFT) {
 				mMove = GameMove.MLEFT;
 			}

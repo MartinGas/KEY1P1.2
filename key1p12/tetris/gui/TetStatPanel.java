@@ -22,7 +22,11 @@ public class TetStatPanel extends JPanel
 	{
 		public boolean isSensitive(GameAction event) {
 			if (event == GameAction.CLEAR)
+			{
+				System.out.println ("score listener was positively asked for sensitivity");
 				return true;
+			}
+				
 			return false;
 		}
 
@@ -31,7 +35,7 @@ public class TetStatPanel extends JPanel
 		{
 			updateCurrentScore (state.getCurrScore());
 			updateHighScore (state.getHighScore());
-			TetStatPanel.this.repaint();
+			repaint();
 		}
 		
 	}

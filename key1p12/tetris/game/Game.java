@@ -99,9 +99,11 @@ public class Game implements Cloneable
 		private Game mGame;
 	}
 	
+	public static boolean DEBUG = false;
+	
 	//suggestion: use classes implementing interface to set, store and modify timer
 	//add to pending changes file, once it exists
-	public final long mFALL_TIME = 1500;
+	public final long mFALL_TIME = 750;
 	//Constructors
 	public Game(Board initBoard, ArrayList<Pentomino> pieces, Player player, HScore currentHScores)
 	{
@@ -124,14 +126,19 @@ public class Game implements Cloneable
 	
 	public void play() 
 	{
+		if (DEBUG)
+			System.out.println ("next turn");
 		if (isGamePaused())
 		{
+			if (DEBUG)
+				System.out.println ("Resuming game");
 			mIsPaused = false;
 			mFallTimer.reset();
 		}
 		//if pentomino is at the bottom
 		if (!checkMove (Direction.DOWN))
 		{
+			System.out.println ("Pent is at bottom");
 			//place the pentomino on the board first
 			placer();
 			rowClearer();
@@ -139,9 +146,13 @@ public class Game implements Cloneable
 			if (gameOverChecker())
 				setGameOver();
 		}
-		if (isGameOver())
+		if (!isGameOver())
 		{
+			if (DEBUG)
+				System.out.println ("Pent faller");
 			pentFaller();
+			if (DEBUG)
+			System.out.println ("react to player input");
 			GameMove playerInput = mPlayer.getMove();
 			switch (playerInput)
 			{
@@ -264,8 +275,9 @@ public class Game implements Cloneable
 			//Get int position if pent moved downwards
 			Position below = new Position (pentPosition.getX(), pentPosition.getY());
 			below.addY (1);
-			if (below.getY() >= field.getHeight() && 
-				field.pentFits(pentClone, below.getPosNum (field.getHeight())))
+			/*if (below.getY() >= field.getHeight() && 
+				field.pentFits(pentClone, below.getPosNum (field.getHeight())))*/
+			if (field.pentFits(pentClone, below.getPosNum (getHeight())))
 				return true;
 		}
 		return false;
@@ -276,7 +288,7 @@ public class Game implements Cloneable
 	 */
 	public boolean checkRotate(Direction direc)
 	{
-		if (direc == Direction.UP)
+		if (direc == Direction.RIGHT)
 		{
 			//Clone Pentomino and rotate clockwise
 			Pentomino pentClone = pentUsed.clone();
@@ -335,14 +347,13 @@ public class Game implements Cloneable
 	 */
 	public void addListener (IGameListener listener)
 	{
-		GameAction[] actarr = {GameAction.MOVE, GameAction.TURN, GameAction.FALL, GameAction.PICK, GameAction.LOSS};
-		for (int cAct = 0; cAct < actarr.length; cAct++)
+		for (GameAction a : GameAction.values())
 		{
-			if (listener.isSensitive (actarr[cAct]))
+			if (listener.isSensitive (a))
 			{
-				if (!mListeners.containsKey (actarr[cAct]))
-					mListeners.put (actarr[cAct], new ArrayList <IGameListener>());
-				mListeners.get(actarr[cAct]).add (listener);
+				if (!mListeners.containsKey (a))
+					mListeners.put (a, new ArrayList <IGameListener>());
+				mListeners.get(a).add (listener);
 			}
 		}
 	}
@@ -355,7 +366,10 @@ public class Game implements Cloneable
 		if (mFallTimer.hasElapsed())
 		{
 			if (this.checkMove (Direction.DOWN))
+			{
+				mFallTimer.reset();
 				this.move (Direction.DOWN);
+			}
 		}
 	}
 	
@@ -374,6 +388,8 @@ public class Game implements Cloneable
 		else if (direc == Direction.DOWN && checkMove (Direction.DOWN))
 			pentPosition.addY(1);
 		notifyListeners (GameAction.MOVE);
+		if (DEBUG)
+			System.out.println ("Pent moved in " + direc);
 	}
 	
 	/**@param direc indicates the direction the pentomino should move
@@ -398,6 +414,8 @@ public class Game implements Cloneable
 			pentPosition = tempPos;
 		}
 		notifyListeners (GameAction.TURN);
+		if (DEBUG)
+			System.out.println ("Pent turned");
 	}
 	
 	/**@return void
@@ -409,6 +427,8 @@ public class Game implements Cloneable
 			this.move(Direction.DOWN);
 		placer();
 		notifyListeners (GameAction.FALL);
+		if (DEBUG)
+			System.out.println ("Pent dropped");
 	}
 	
 	/**@return void
@@ -423,6 +443,8 @@ public class Game implements Cloneable
 		pentUsed = blocks.get(index);
 		pentPosition = new Position((int)Math.ceil(field.getWidth() / 2),0);
 		notifyListeners (GameAction.PICK);
+		if (DEBUG)
+			System.out.println ("new pent picked");
 	}
 	
 	
@@ -457,12 +479,15 @@ public class Game implements Cloneable
 	private void rowMover(int index)
 	{
 		int lastLineClear = index;
-		while (index > 0 && field.isRowEmpty (index) == false)
-		{
-			field.moveRow (index);
-			index--;
-			lastLineClear = index;
-		}
+		if (index > 0)
+ 		{
+			do
+			{
+				field.moveRow (index);
+				index--;
+				lastLineClear = index;
+			}while (index > 0 && field.isRowEmpty (index) == false);
+ 		}
 		field.clearRow(lastLineClear);
 	}
 	
