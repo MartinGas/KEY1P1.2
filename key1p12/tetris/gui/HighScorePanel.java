@@ -9,11 +9,10 @@ import key1p12.tetris.game.Score;
 import key1p12.tetris.game.Game;
 
 @SuppressWarnings("serial")
-public class HighScoreDialog extends JDialog 
+public class HighScorePanel extends JPanel 
 {
-	public HighScoreDialog (JFrame owner, boolean modal)
+	public HighScorePanel ()
 	{
-		super (owner, modal);
 		mDisplayContents = new ArrayList <ArrayList <JLabel>>();
 	}
 	
@@ -21,21 +20,28 @@ public class HighScoreDialog extends JDialog
 	{
 		mDisplayContents.clear();
 		int entries = hslist.getNumberEntries();
-		super.getContentPane().setLayout(new GridLayout (entries, 3));
+		setLayout(new GridLayout (entries, 3));
 		for (int cEntries = 0; cEntries < entries; ++cEntries)
 		{
 			ArrayList <JLabel> newEntry = new ArrayList <JLabel>();
-			JLabel rank = new JLabel();
+			JLabel rank = new JLabel ();
+			rank.setHorizontalAlignment(SwingConstants.CENTER);
+			rank.setVerticalAlignment (SwingConstants.CENTER);
 			newEntry.add(rank);
 			add (rank);
 			JLabel score = new JLabel();
+			score.setHorizontalAlignment(SwingConstants.CENTER);
+			score.setVerticalAlignment (SwingConstants.CENTER);
 			newEntry.add (score);
 			add (score);
 			JLabel name = new JLabel();
+			name.setHorizontalAlignment(SwingConstants.CENTER);
+			name.setVerticalAlignment (SwingConstants.CENTER);
 			newEntry.add (name);
 			add (name);
 			mDisplayContents.add (newEntry);
 		}
+		update (hslist);
 	}
 	
 	public void update (HScore hslist)
@@ -49,12 +55,6 @@ public class HighScoreDialog extends JDialog
 			comps.get (1).setText ("" + s.getScore());
 			comps.get (2).setText (s.getName());
 		}
-	}
-	
-	public void paint (Graphics g)
-	{
-		
-		super.paint (g);
 	}
 	
 	private ArrayList <ArrayList <JLabel>> mDisplayContents;

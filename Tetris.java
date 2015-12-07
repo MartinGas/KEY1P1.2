@@ -107,7 +107,8 @@ public class Tetris
 		public void actionPerformed (ActionEvent e) 
 		{
 			constructGame (this);
-			mGui.setUpGamePanel(mGame, new PauseButtonListener());
+			mGui.setUpHighScorePanel (mHSList);
+			mGui.setUpGamePanel (mGame, new PauseButtonListener());
 			
 			mGui.hideDialog(TetrisGui.ScreenType.SETUP);
 			mGui.showPanel (TetrisGui.ScreenType.GAME);
@@ -123,11 +124,9 @@ public class Tetris
 	{
 		public void run() 
 		{
-			System.out.println ("Running game");
 			mGui.setFocusable(true);
-			while (!mGui.hasFocus())
-				mGui.requestFocus();
-			System.out.println ("game window focussed " + mGui.hasFocus());
+			mGui.requestFocus();
+			
 			if (mGame.isGamePaused())
 				mGame.play();
 			
@@ -140,6 +139,20 @@ public class Tetris
 				{
 					Thread.sleep(100);
 				}catch (Exception e) {}
+			}
+			
+			if (mGame.isGameOver())
+			{
+				try
+				{
+					mHSList.writeToFile();
+				}
+				catch (IOException e)
+				{
+					System.err.println ("Unable to save changes to high score");
+				}
+				mGui.setUpGameOverPanel(mHSList);
+				mGui.showPanel (TetrisGui.ScreenType.OVER);
 			}
 		}
 		
@@ -203,26 +216,25 @@ public class Tetris
 			player = <bot constructors>*/
 		assert (player != null);
 		//create & load high score
-		HScore scores = null;
 		try
 		{
 			File hsFile = new File (hsFilePath);
 			if (!hsFile.exists())
 				HScore.generateHighScoreFile(hsFile, mHSLIST_ENTRIES);
-			scores = new HScore(hsFile, player.getName(), new ExponentialScore(2, 1, 1));
+			mHSList = new HScore(hsFile, player.getName(), new ExponentialScore(2, 1, 1));
 		}
 		//if generating the high score file does not work
 		catch (IOException e1) 
 		{
 			System.err.println ("Could not generate high score file");
 		}
-		mGui.setUpHighScorePanel (scores);
+		
 		//create board
 		Board gameBoard = new Board (setup.getInputWidth(), setup.getInputHeight());
 		//create pentominoes
 		ArrayList <Pentomino> pentsToUse = Pentomino.createsPentList();
 		//create game
-		mGame = new Game(gameBoard, pentsToUse, player, scores);
+		mGame = new Game(gameBoard, pentsToUse, player, mHSList);
 		addGameListeners (gameListeners);
 	}
 	
@@ -238,7 +250,7 @@ public class Tetris
 		//show pause screen
 	}
 
-	
+	private HScore mHSList;
 	private Game mGame;
 	//private HScore mHighestScores;
 	private TetrisGui mGui;

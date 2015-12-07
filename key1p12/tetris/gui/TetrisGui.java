@@ -16,16 +16,6 @@ import key1p12.tetris.game.HScore;
 public class TetrisGui extends JFrame 
 {	
 	
-	public static abstract class TypeListener <TEnum> implements ItemListener
-	{
-		public TEnum getType()
-		{
-			return mType;
-		}
-		
-		protected TEnum mType;
-	}
-	
 	public static abstract class GameSetupListener implements ActionListener
 	{
 		public void setupBoardInputs (JTextField widthInputField, JTextField heightInputField)
@@ -96,7 +86,7 @@ public class TetrisGui extends JFrame
 	
 	public enum PMType {};
 	
-	public enum ScreenType {GAME, SETUP, PAUSE, HIGHSCORE, START};
+	public enum ScreenType {GAME, SETUP, PAUSE, HIGHSCORE, START, OVER};
 	
 	
 	public TetrisGui (Dimension windowSize, String caption, Image icon)
@@ -143,6 +133,14 @@ public class TetrisGui extends JFrame
 		mMainMenuPanel.add (playButton);
 		mMainMenuPanel.add (hsButton);
 		mMainMenuPanel.add (quitButton);
+	}
+	
+	public void setUpGameOverPanel (HScore hsList)
+	{
+		GameOverPanel goPanel = new GameOverPanel();
+		goPanel.setup (hsList);
+		
+		mGameOverPanel = goPanel;
 	}
 	
 	public void setUpGameSetupPanel (GameSetupListener setupListener)
@@ -278,17 +276,19 @@ public class TetrisGui extends JFrame
 	
 	public void setUpHighScorePanel (HScore scoreList)
 	{
-		HighScoreDialog hsdiag = new HighScoreDialog (this, true);
-		hsdiag.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-		hsdiag.setTitle ("high scores");
-		hsdiag.setSize(DIALOG_DIM);
-		hsdiag.setup (scoreList);
+		mHighScoreDialog = new JDialog (this, true);
+		mHighScoreDialog.setDefaultCloseOperation (JDialog.DISPOSE_ON_CLOSE);
+		mHighScoreDialog.setTitle ("high scores");
+		mHighScoreDialog.setSize (DIALOG_DIM);
+		mHighScoreDialog.setLayout (new BorderLayout());
 		
-		hsdiag.update (scoreList);
-		mHighScoreDialog = hsdiag; 
+		HighScorePanel hsPanel = new HighScorePanel();
+		hsPanel.setup (scoreList);
+		
+		mHighScoreDialog.add (hsPanel, BorderLayout.CENTER);
+		
+		hsPanel.update (scoreList);
 	}
-	
-	
 	
 	public void showPanel (ScreenType panelToLoad)
 	{
@@ -303,6 +303,10 @@ public class TetrisGui extends JFrame
 		case START:
 			assert (mMainMenuPanel != null);
 			swapIn = mMainMenuPanel;
+			break;
+		case OVER:
+			assert (mGameOverPanel != null);
+			swapIn = mGameOverPanel;
 			break;
 		default: assert (false);
 			break;
@@ -344,6 +348,6 @@ public class TetrisGui extends JFrame
 		}
 	}
 	
-	private JPanel mGamePanel, mMainMenuPanel;
+	private JPanel mGamePanel, mMainMenuPanel, mGameOverPanel;
 	private JDialog mGameSetupDialog, mPauseMenuDialog, mHighScoreDialog;
 }

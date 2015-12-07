@@ -7,7 +7,7 @@ import key1p12.tetris.gui.*;
 import key1p12.tetris.game.*;
 import javax.swing.*;
 
-public class HighScoreDialogTest 
+public class HighScorePanelTest 
 {
 	public static void main (String[] args)
 	{
@@ -18,17 +18,15 @@ public class HighScoreDialogTest
 			HScore hslist = new HScore (hsfile, "xyz", new ExponentialScore (2, 1, 1));
 			JFrame mframe = new JFrame();
 			setupFrame (mframe);
-			HighScoreDialog hsdialog = new HighScoreDialog(mframe, true);
-			hsdialog.setDefaultCloseOperation (JDialog.HIDE_ON_CLOSE);
-			hsdialog.setup (hslist);
-			hsdialog.setSize (200, 200);
+			
+			HighScorePanel hsPanel = new HighScorePanel();
+			hsPanel.setup (hslist);
+			mframe.add(hsPanel);
 			mframe.setVisible (true);
-			hsdialog.setVisible(true);
 			
 			hslist.increaseScore(10);
 			hslist.writeToFile();
-			hsdialog.update (hslist);
-			hsdialog.setVisible(true);
+			hsPanel.update (hslist);
 		} 
 		catch (IOException e) 
 		{

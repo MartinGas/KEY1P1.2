@@ -145,7 +145,7 @@ public class HScore extends Score
 		{
 			++iComp;
 		}
-		if (super.compareTo (mHighScores.get (iComp)) < 0)
+		if (iComp < mHighScores.size() && super.compareTo (mHighScores.get (iComp)) < 0)
 		{
 			copyScoresDown (iComp);
 			mHighScores.set (iComp, this);
