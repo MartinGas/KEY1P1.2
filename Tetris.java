@@ -57,6 +57,7 @@ public class Tetris
 		{
 			Thread t = new Thread (new GameRunner());
 			mGui.hideDialog (TetrisGui.ScreenType.PAUSE);
+			t.start();
 		}
 	}
 	
@@ -135,10 +136,6 @@ public class Tetris
 				mGame.play();
 				if (!mGui.hasFocus())
 					System.out.println ("lost focus");
-				try
-				{
-					Thread.sleep(100);
-				}catch (Exception e) {}
 			}
 			
 			if (mGame.isGameOver())
