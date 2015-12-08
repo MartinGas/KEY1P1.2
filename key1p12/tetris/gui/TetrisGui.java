@@ -275,44 +275,45 @@ public class TetrisGui extends JFrame
 		JButton startGameButton = new JButton ("start");
 		startGameButton.addActionListener(setupListener);
 		
-		GridBagConstraints cDesPSelect = new GridBagConstraints();
+		int extSpace = 5;
+		GridBagConstraints cUniversal = new GridBagConstraints();
+		cUniversal.gridwidth = 1;
+		cUniversal.gridheight = 1;
+		cUniversal.fill = GridBagConstraints.BOTH;
+		cUniversal.insets = new Insets (extSpace, extSpace, extSpace, extSpace);
+		cUniversal.anchor = GridBagConstraints.CENTER;
+		
+		GridBagConstraints cDesPSelect = (GridBagConstraints)cUniversal.clone();
 		cDesPSelect.gridx = 0;
 		cDesPSelect.gridy = 0;
-		cDesPSelect.gridwidth = 1;
+		cDesPSelect.gridwidth = 2;
 		cDesPSelect.gridheight = 1;
-		cDesPSelect.fill = GridBagConstraints.BOTH;
-		//cDesPSelect.anchor = GridBagConstraints.PAGE_START;
 		
 		GridBagConstraints cPTypeSelect = (GridBagConstraints) cDesPSelect.clone();
 		cPTypeSelect.gridy = 1;
-		cPTypeSelect.anchor = GridBagConstraints.CENTER;
 		
-		GridBagConstraints cPlayerSelection;
-		cPlayerSelection = (GridBagConstraints) cDesPSelect.clone();
+		GridBagConstraints cPlayerSelection = (GridBagConstraints) cDesPSelect.clone();
 		cPlayerSelection.gridy = 2;
-		cPlayerSelection.gridheight = 1;
 		
-		GridBagConstraints cDesBoardConfig = (GridBagConstraints) cDesPSelect.clone();
-		cDesBoardConfig.gridx = 1;
-		cDesBoardConfig.gridy = 0;
+		GridBagConstraints cDesBoardConfig = (GridBagConstraints) cUniversal.clone();
+		cDesBoardConfig.gridx = 0;
+		cDesBoardConfig.gridy = 3;
 		cDesBoardConfig.gridwidth = 2;
-		cDesBoardConfig.gridheight = 1;
 		
 		GridBagConstraints cBoardWInput;
 		cBoardWInput = (GridBagConstraints) cDesBoardConfig.clone();
-		cBoardWInput.gridy = 1;
+		cBoardWInput.gridy = 4;
 		cBoardWInput.gridwidth = 1;
+		cBoardWInput.weightx = 0.5;
 		
 		GridBagConstraints cBoardHInput;
 		cBoardHInput = (GridBagConstraints) cBoardWInput.clone();
-		cBoardHInput.gridx = 2;
+		cBoardHInput.gridx = 1;
 		
 		GridBagConstraints cStartButton;
 		cStartButton = (GridBagConstraints) cDesPSelect.clone();
-		cStartButton.gridx = 1;
-		cStartButton.gridy = 2;
+		cStartButton.gridy = 5;
 		cStartButton.gridwidth = 2;
-		cStartButton.gridheight = 1;
 		
 		mGameSetupDialog.add (playerDes, cDesPSelect);
 		mGameSetupDialog.add (playerType, cPTypeSelect);
@@ -389,14 +390,21 @@ public class TetrisGui extends JFrame
 	public void showDialog (ScreenType diag)
 	{
 		assert (diag == ScreenType.HIGHSCORE || diag == ScreenType.PAUSE || diag == ScreenType.SETUP);
+		JDialog show = null;
 		switch (diag)
 		{
-		case HIGHSCORE: 	mHighScoreDialog.setVisible (true);
+		case HIGHSCORE: 	show = mHighScoreDialog;
 		break;
-		case PAUSE: 		mPauseMenuDialog.setVisible (true);
+		case PAUSE: 		show = mPauseMenuDialog;
 		break;
-		case SETUP: 		mGameSetupDialog.setVisible (true);
+		case SETUP: 		show = mGameSetupDialog;
 		break;
+		}
+		
+		if (show != null)
+		{
+			show.setLocation ((int)0.5 * (this.getWidth() - show.getWidth()), (int)0.5 * (this.getHeight() - show.getHeight()));
+			show.setVisible(true);
 		}
 	}
 	

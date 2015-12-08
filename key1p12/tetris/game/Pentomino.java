@@ -4,6 +4,45 @@ import java.util.ArrayList;
 public class Pentomino implements Cloneable
 { 
 
+	public static ArrayList <Pentomino> createTetraList()
+	{
+		ArrayList <Pentomino> mats = new ArrayList <Pentomino>();
+		MatrixHandler m = null;
+		//square
+		m = new MatrixHandler(2, 2);
+		m.setCell(0, 0, 1);
+		m.setCell(0, 1, 1);
+		m.setCell(1, 0, 1);
+		m.setCell(1, 1, 1);
+		mats.add(new Pentomino (m));
+		
+		//n
+		m = new MatrixHandler (2, 3);
+		m.setCell(0, 0, 2);
+		m.setCell(0, 1, 2);
+		m.setCell(1, 1, 2);
+		m.setCell(1, 2, 2);
+		mats.add(new Pentomino (m));
+		
+		//l
+		m = new MatrixHandler (2, 3);
+		m.setCell(0, 0, 3);
+		m.setCell(0, 1, 3);
+		m.setCell(0, 2, 3);
+		m.setCell(1, 2, 3);
+		mats.add(new Pentomino (m));
+		
+		//i
+		m = new MatrixHandler (1, 4);
+		m.setCell(0, 0, 4);
+		m.setCell(0, 1, 4);
+		m.setCell(0, 2, 4);
+		m.setCell(0, 3, 4);
+		mats.add(new Pentomino (m));
+		
+		return mats;
+	}
+	
 	/**Arraylist with the 12 original pentominoes */
 	public static ArrayList<Pentomino> createsPentList() {
 
