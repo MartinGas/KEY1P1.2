@@ -55,7 +55,7 @@ public class MatrixHandler {
 	public int getCloseRow(Direction direc, int position) 
 	{
 		assert(direc == Direction.UP || direc == Direction.DOWN);
-		Position pos = new Position(position, this.getHeight());
+		Position pos = Position.fromPosNum(position, getHeight());
 		int x = pos.getX();
 		int y = pos.getY();
 		//Check rows above

@@ -12,6 +12,9 @@ import javax.swing.text.JTextComponent;
 //own imports
 import key1p12.tetris.game.Game;
 import key1p12.tetris.game.HScore;
+import key1p12.tetris.game.PlayerType;
+import key1p12.tetris.bot.BotType;
+import key1p12.tetris.bot.PerfMeasureType;
 
 public class TetrisGui extends JFrame 
 {	
@@ -29,11 +32,16 @@ public class TetrisGui extends JFrame
 			mNameInputField = nameInputField;
 		}
 		
-		public void setupTypeInput (JComboBox <PlayerType> playerTypeInput, JComboBox <BotType> botTypeInput, JComboBox <PMType> pmTypeInput)
+		public void setupTypeInput (JComboBox <PlayerType> playerTypeInput, JComboBox <BotType> botTypeInput, JComboBox <PerfMeasureType> PerfMeasureTypeInput)
 		{
 			mPlayerTypeInput = playerTypeInput;
 			mBotTypeInput = botTypeInput;
-			mPMTypeInput = pmTypeInput;
+			mPerfMeasureTypeInput = PerfMeasureTypeInput;
+		}
+		
+		public void setupCustomBotListener (CustomBotListener cbl)
+		{
+			mCBL = cbl;
 		}
 	
 		/**
@@ -46,14 +54,19 @@ public class TetrisGui extends JFrame
 			return (PlayerType)mPlayerTypeInput.getSelectedItem();
 		}
 		
+		public HashMap <PerfMeasureType, Double> getCustomPMeasure()
+		{
+			return mCBL.getTypesAndWeights();
+		}
+		
 		public BotType getBotType()
 		{
 			return (BotType)mBotTypeInput.getSelectedItem();
 		}
 		
-		public PMType getPerfMeasureType()
+		public PerfMeasureType getPerfMeasureType()
 		{
-			return (PMType)mPMTypeInput.getSelectedItem();
+			return (PerfMeasureType)mPerfMeasureTypeInput.getSelectedItem();
 		}
 		
 		public String getPlayerName()
@@ -73,18 +86,51 @@ public class TetrisGui extends JFrame
 		
 		private JComboBox <PlayerType> mPlayerTypeInput;
 		private JComboBox <BotType> mBotTypeInput;
-		private JComboBox <PMType> mPMTypeInput;
+		private JComboBox <PerfMeasureType> mPerfMeasureTypeInput;
+		private CustomBotListener mCBL;
 		private JTextField  mNameInputField, mWidthInputField, mHeightInputField;
+	}
+	
+	public class CustomBotListener implements ItemListener, ActionListener
+	{
+		CustomBotListener (JButton adder)
+		{
+			mAddPerfMeasures = adder;
+			mTypeToWeight = new HashMap <PerfMeasureType, Double>();
+		}
+		
+		@Override
+		public void actionPerformed(ActionEvent e) 
+		{
+
+			PerfMeasureType selection = (PerfMeasureType)JOptionPane.showInputDialog (mGameSetupDialog, "performance measure", "Select...", JOptionPane.QUESTION_MESSAGE, null, PerfMeasureType.values(), PerfMeasureType.values()[0]);
+			double weight = Double.parseDouble(JOptionPane.showInputDialog (mGameSetupDialog, "Enter corresponding weight "));
+			mTypeToWeight.put (selection, weight);
+		}
+
+		@Override
+		public void itemStateChanged(ItemEvent e) 
+		{
+			if (e.getItem() == PerfMeasureType.CUSTOM)
+				mAddPerfMeasures.setVisible(true);
+			else
+			{
+				mAddPerfMeasures.setVisible(false);
+				mTypeToWeight.clear();
+			}
+		}
+		
+		public HashMap <PerfMeasureType, Double> getTypesAndWeights()
+		{
+			return mTypeToWeight;
+		}
+		
+		private JButton mAddPerfMeasures;
+		private HashMap <PerfMeasureType, Double> mTypeToWeight;
 	}
 	
 	public static final Dimension DIALOG_DIM = new Dimension (300, 450);
 	public static final Color DEFAULT_BLOCK_COLOR = Color.BLACK;
-	
-	public enum PlayerType {HUMAN, BOT};
-	
-	public enum BotType {GREEDY, TREE, GENETIC};
-	
-	public enum PMType {};
 	
 	public enum ScreenType {GAME, SETUP, PAUSE, HIGHSCORE, START, OVER};
 	
@@ -169,7 +215,6 @@ public class TetrisGui extends JFrame
 			private JPanel mTabs;
 		}
 		
-		
 		mGameSetupDialog = new JDialog (this, true);
 		mGameSetupDialog.setTitle ("Game setup");
 		mGameSetupDialog.setDefaultCloseOperation (DISPOSE_ON_CLOSE);
@@ -182,15 +227,35 @@ public class TetrisGui extends JFrame
 		JLabel playerDes = new JLabel ("Configure player");
 		
 		JComboBox <BotType> botType = new JComboBox <BotType> (BotType.values());
-		JComboBox <PMType> pmType = new JComboBox <PMType> (PMType.values());
+		JComboBox <PerfMeasureType> pmType = new JComboBox <PerfMeasureType> (PerfMeasureType.values());
+		
+		JButton addCustomPM = new JButton ("+");
+		addCustomPM.setVisible(false);
+		CustomBotListener customAdder = new CustomBotListener (addCustomPM);
+		addCustomPM.addActionListener(customAdder);
+		pmType.addItemListener(customAdder);
 		
 		JTextField enterPlayerName = new JTextField ("name");
 		enterPlayerName.selectAll();
 		setupListener.setupPlayerNameInput(enterPlayerName);
 		
-		JPanel botConfigPanel = new JPanel (new GridLayout (2, 1));
-		botConfigPanel.add (botType);
-		botConfigPanel.add (pmType);
+		JPanel botConfigPanel = new JPanel (new GridBagLayout());
+		GridBagConstraints cBotType = new GridBagConstraints();
+		cBotType.gridx = 0;
+		cBotType.gridy = 0;
+		cBotType.gridwidth = 1;
+		cBotType.gridheight = 1;
+		cBotType.fill = GridBagConstraints.BOTH;
+		
+		GridBagConstraints cPerfMeasureType = (GridBagConstraints) cBotType.clone();
+		cPerfMeasureType.gridy = 1;
+		GridBagConstraints cCustomAdder = (GridBagConstraints) cBotType.clone();
+		cCustomAdder.gridx = 1;
+		botConfigPanel.add (botType, cBotType);
+		botConfigPanel.add (pmType, cPerfMeasureType);
+		botConfigPanel.add (addCustomPM, cCustomAdder);
+		setupListener.setupCustomBotListener (customAdder);
+		
 		JPanel playerConfigPanel = new JPanel (new CardLayout());
 		playerConfigPanel.add (enterPlayerName, PlayerType.HUMAN.toString());
 		playerConfigPanel.add (botConfigPanel, PlayerType.BOT.toString());
@@ -215,7 +280,8 @@ public class TetrisGui extends JFrame
 		cDesPSelect.gridy = 0;
 		cDesPSelect.gridwidth = 1;
 		cDesPSelect.gridheight = 1;
-		cDesPSelect.anchor = GridBagConstraints.PAGE_START;
+		cDesPSelect.fill = GridBagConstraints.BOTH;
+		//cDesPSelect.anchor = GridBagConstraints.PAGE_START;
 		
 		GridBagConstraints cPTypeSelect = (GridBagConstraints) cDesPSelect.clone();
 		cPTypeSelect.gridy = 1;
@@ -226,7 +292,7 @@ public class TetrisGui extends JFrame
 		cPlayerSelection.gridy = 2;
 		cPlayerSelection.gridheight = 1;
 		
-		GridBagConstraints cDesBoardConfig = new GridBagConstraints();
+		GridBagConstraints cDesBoardConfig = (GridBagConstraints) cDesPSelect.clone();
 		cDesBoardConfig.gridx = 1;
 		cDesBoardConfig.gridy = 0;
 		cDesBoardConfig.gridwidth = 2;
@@ -242,7 +308,7 @@ public class TetrisGui extends JFrame
 		cBoardHInput.gridx = 2;
 		
 		GridBagConstraints cStartButton;
-		cStartButton = new GridBagConstraints();
+		cStartButton = (GridBagConstraints) cDesPSelect.clone();
 		cStartButton.gridx = 1;
 		cStartButton.gridy = 2;
 		cStartButton.gridwidth = 2;

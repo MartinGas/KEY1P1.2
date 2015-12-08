@@ -1,10 +1,10 @@
 package key1p12.tetris.bot;
-import key1p12.tetris.game.Game;
+import key1p12.tetris.game.Game.SimulGame;;
 
 
 public interface PerfMeasure 
 {
-	public int getPerf (Game.SimulGame state);
+	public double getPerf (SimulGame state);
 	
-	public int mayExceed (Game.SimulGame known, Game.SimulGame test);
+	public boolean mayExceed (SimulGame known, SimulGame test);
 }

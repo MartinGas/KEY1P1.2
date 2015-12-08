@@ -98,6 +98,12 @@ public class HScore extends Score
 		return out;
 	}
 	
+	
+	public HScore clone()
+	{
+		return new HScore (this);
+	}
+	
 	/**
 	 * locks the object and writes changes to file
 	 * @throws IOException
@@ -135,6 +141,17 @@ public class HScore extends Score
 	public Score getScore (int index)
 	{
 		return mHighScores.get(index).clone();
+	}
+	
+	/**
+	 * Clone constructor
+	 */
+	private HScore (HScore copy)
+	{
+		super (copy);
+		mHighScores = (ArrayList<Score>)copy.mHighScores;
+		mStorage = copy.mStorage;
+		mEntries = copy.mEntries;
 	}
 	
 	//if possible inserts current score into sorted array list

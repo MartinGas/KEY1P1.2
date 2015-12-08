@@ -6,13 +6,13 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.ArrayList;
-
+import java.util.*;
 import javax.imageio.ImageIO;
 
 //own imports
 import key1p12.tetris.game.*;
 import key1p12.tetris.bot.*;
+import key1p12.tetris.bot.Bot.PickListener;
 import key1p12.tetris.gui.*;
 
 //class initializing and controling the application
@@ -22,12 +22,15 @@ public class Tetris
 	public final static String mCAPTION = new String ("Tetris!");
 	public final static String iconImgPath = "res/image/appIcon.png";
 	public final static String hsFilePath = "highscores.txt";
+	public final static String nameBase = "nameDataBase.txt";
 	
 	public final static int mBOARD_COLS = 5, mBOARD_ROWS = 15, mHSLIST_ENTRIES = 10;
+	public final static int XTOMINO = 5;
 	
 	public static void main (String args[])
 	{
 		//Game.DEBUG = true;
+		//Bot.DEBUG = true;
 		
 		Tetris app = null;
 		try
@@ -134,8 +137,6 @@ public class Tetris
 			while (!mGame.isGameOver() && !mGame.isGamePaused())
 			{
 				mGame.play();
-				if (!mGui.hasFocus())
-					System.out.println ("lost focus");
 			}
 			
 			if (mGame.isGameOver())
@@ -200,17 +201,19 @@ public class Tetris
 	private void constructGame (TetrisGui.GameSetupListener setup)
 	{
 		ArrayList <IGameListener> gameListeners = new ArrayList <IGameListener>();
+		ScoreCountable scoreComputer = new ExponentialScore (2, 1, 1);
 		//create player
 		Player player = null;
-		if (setup.getPlayerType() == TetrisGui.PlayerType.HUMAN)
+		
+		try
 		{
-			HumanPlayer hplayer = new HumanPlayer(setup.getPlayerName());
-			//construct and add keyboard input listener
-			mGui.addKeyListener (hplayer.new InputListener());
-			player = hplayer;
+			player = constructPlayer (setup, gameListeners, scoreComputer);
 		}
-		/*else
-			player = <bot constructors>*/
+		catch (IOException e)
+		{
+			System.err.println ("name base file not found");
+		}
+			
 		assert (player != null);
 		//create & load high score
 		try
@@ -218,7 +221,7 @@ public class Tetris
 			File hsFile = new File (hsFilePath);
 			if (!hsFile.exists())
 				HScore.generateHighScoreFile(hsFile, mHSLIST_ENTRIES);
-			mHSList = new HScore(hsFile, player.getName(), new ExponentialScore(2, 1, 1));
+			mHSList = new HScore(hsFile, player.getName(), scoreComputer);
 		}
 		//if generating the high score file does not work
 		catch (IOException e1) 
@@ -233,6 +236,77 @@ public class Tetris
 		//create game
 		mGame = new Game(gameBoard, pentsToUse, player, mHSList);
 		addGameListeners (gameListeners);
+	}
+	
+	/**
+	 * Constructs a player based on setup
+	 * @param setup setup listener storing setup values
+	 * @param gameListeners array list to store game listeners in which need to be installed on the game by the caller
+	 * @param scoreComp score computer object
+	 * @return constructed player
+	 * @throws FileNotFoundException
+	 */
+	private Player constructPlayer (TetrisGui.GameSetupListener setup, ArrayList <IGameListener> gameListeners, ScoreCountable scoreComp) throws FileNotFoundException
+	{
+		Player player = null;
+		
+		//construct human player
+		if (setup.getPlayerType() == PlayerType.HUMAN)
+		{
+			HumanPlayer hplayer = new HumanPlayer(setup.getPlayerName());
+			//construct and add keyboard input listener
+			mGui.addKeyListener (hplayer.new InputListener());
+			player = hplayer;
+		}
+		//construct bot
+		else
+		{
+			ArrayList <PerfMeasure> pms = new ArrayList <PerfMeasure>();
+			ArrayList <Double> weights = new ArrayList <Double>();
+			
+			PerfMeasureFactory pmFax = new PerfMeasureFactory((int) scoreComp.calculateScore(XTOMINO));
+			
+			if (setup.getPerfMeasureType() != PerfMeasureType.CUSTOM)
+			{
+				pms.add (pmFax.getPMeasure(setup.getPerfMeasureType()));
+				weights.add (new Double (1.0));
+			}
+			else
+			{
+				HashMap <PerfMeasureType, Double> pairs = setup.getCustomPMeasure();
+				for (PerfMeasureType t : PerfMeasureType.values())
+				{
+					if (pairs.containsKey(t))
+					{
+						pms.add (pmFax.getPMeasure (t));
+						weights.add (pairs.get (t));
+						System.out.println ("Adding custom performance measure " + t + " weight = " + pairs.get(t));
+					}
+				}
+			}
+			
+			assert (pms != null);
+			switch (setup.getBotType())
+			{
+			case GREEDY: 	GreedyBot gb = new GreedyBot (pms, weights, new File (nameBase));
+							gameListeners.add (gb.new PickListener());
+							player = gb;
+							break;
+			case GENETIC:	GeneticBot genb = new GeneticBot(pms, weights, new File (nameBase), 0.1, 1000, 3, 10);
+							gameListeners.add (genb.new PickListener());
+							player = genb;
+							break;
+			case TREE: 		TreeSearchBot tsb = new TreeSearchBot(pms, weights, new File (nameBase), 4);
+							gameListeners.add (tsb.new PickListener());
+							player = tsb;
+							break;
+				
+			}
+			
+		}
+		
+		assert (player != null);
+		return player;
 	}
 	
 	private void addGameListeners (ArrayList <IGameListener> gameListeners)

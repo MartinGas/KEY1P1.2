@@ -85,7 +85,6 @@ public class GameOverPanel extends JPanel
 			Graphics2D g2 = (Graphics2D)g;
 			g2.setFont(mFont);
 			
-			Rectangle2D clip = new Rectangle2D.Double();
 			FontMetrics fm = g2.getFontMetrics();
 			int drawW = fm.stringWidth(mText);
 			int drawH = fm.getHeight();

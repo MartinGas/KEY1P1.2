@@ -14,9 +14,9 @@ public class TreeSearchBot extends GreedyBot {
 	 * @param searchDepth search depth of tree
 	 * @throws FileNotFoundException
 	 */
-	public TreeSearchBot(PerfMeasure pMeasure, File nameDataBase, int searchDepth) throws FileNotFoundException 
+	public TreeSearchBot(ArrayList <PerfMeasure> pMeasures, ArrayList <Double> weights,  File nameDataBase, int searchDepth) throws FileNotFoundException 
 	{
-		super(pMeasure, nameDataBase);
+		super(pMeasures, weights, nameDataBase);
 		mSearchDepth = searchDepth;
 	}
 	
@@ -38,12 +38,12 @@ public class TreeSearchBot extends GreedyBot {
 		//compute immediate moves
 		ArrayList <InstructionSet> firstMoves = super.genPossibleMoves (new InstructionSet (state));
 		InstructionSet bestAveragedMove = null;
-		int bestAveragedMoveScore = Integer.MIN_VALUE;
+		double bestAveragedMoveScore = Double.MIN_VALUE;
 		//determine average score for each of immediate moves
 		for (InstructionSet firstMove : firstMoves)
 		{
 			//averaging tree search
-			int averagedMoveScore = iterBranch (firstMove, 0, mSearchDepth);
+			double averagedMoveScore = iterBranch (firstMove, 0, mSearchDepth);
 			//compare to best result
 			if (averagedMoveScore > bestAveragedMoveScore)
 			{
@@ -56,7 +56,7 @@ public class TreeSearchBot extends GreedyBot {
 		setMove (bestAveragedMove);
 	}
 	
-	private int iterBranch (InstructionSet root, int depth, int maxDepth)
+	private double iterBranch (InstructionSet root, int depth, int maxDepth)
 	{
 		//TODO implement performance measure based pruning
 			
@@ -64,14 +64,15 @@ public class TreeSearchBot extends GreedyBot {
 				
 					
 		//calculate average for best moves of pentominoes
-		int averageScore = 0;
+		double averageScore = 0;
 		//simulate every pentomino
+		//TODO implements follow ups method in abstract bot
 		ArrayList <InstructionSet> foUps = root.getFollowUp();
 		for (InstructionSet foUp : foUps)
 		{
 			//get moves for every pentomino
 			ArrayList <InstructionSet> moves = super.genPossibleMoves (foUp);
-			int maxScore = Integer.MIN_VALUE;
+			double maxScore = Double.MIN_VALUE;
 			//if depth == maxDepth: store best move value for this pentomino
 			if (depth >= maxDepth)
 			{
@@ -87,7 +88,7 @@ public class TreeSearchBot extends GreedyBot {
 				for (InstructionSet move : moves)
 				{
 					//averaged score of best moves + current performance value
-					int branchScore = iterBranch (move, depth + 1, maxDepth) + move.getPMeasure();
+					double branchScore = iterBranch (move, depth + 1, maxDepth) + move.getPMeasure();
 					//compare to maximum
 					if (branchScore > maxScore)
 						maxScore = branchScore;
@@ -97,7 +98,7 @@ public class TreeSearchBot extends GreedyBot {
 			averageScore += maxScore;
 		}
 		//compute average & return
-		averageScore = (int) Math.round ((double)averageScore / (double)foUps.size());
+		averageScore = (int) Math.round (averageScore / (double)foUps.size());
 		return averageScore;
 	}
 	

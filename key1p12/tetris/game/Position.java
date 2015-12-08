@@ -9,7 +9,7 @@ public class Position implements Cloneable
 	 */
 	public static Position fromPosNum (int posNum, int rows)
 	{
-		return new Position ((int)Math.ceil (posNum / rows) - 1, (int)(posNum - 1) % rows);
+		return new Position ((int)Math.ceil ((posNum - 1) / rows), (int)(posNum - 1) % rows);
 	}
 	
 	/** @param x x coordinate of the position to be constructed
@@ -30,6 +30,12 @@ public class Position implements Cloneable
 	}	
 	
 	//getMethods
+	
+	public Position clone()
+	{
+		return new Position (x, y);
+	}
+	
 	/** @return x coordinate of position**/
 	public int getX(){
 		return x;	

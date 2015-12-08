@@ -30,8 +30,11 @@ public class Game implements Cloneable
 		
 		public SimulGame (Game source)
 		{
-			mGame = (Game)source.clone();
-			mGame.mListeners.clear();
+			Board clonedBoard = source.field.clone();
+			mGame = new Game (clonedBoard, source.blocks, source.mPlayer, source.mHighScore.clone());
+			mGame.pentPosition = source.pentPosition.clone();
+			mGame.pentUsed = source.pentUsed.clone();
+			
 			assert (mGame.mListeners.isEmpty());
 		}
 		
@@ -48,6 +51,56 @@ public class Game implements Cloneable
 		public Pentomino getUsedPent()
 		{
 			return mGame.pentUsed;
+		}
+		
+		public Score getCurrScore()
+		{
+			return mGame.getCurrScore();
+		}
+		
+		public int getLastScoreDifference()
+		{
+			return mDeltaScore;
+		}
+		
+		public String toString()
+		{
+			String s = new String ("");
+			for (int cRow = 0; cRow < mGame.getHeight(); ++cRow)
+			{
+				
+				for (int cCol = 0; cCol < mGame.getWidth(); ++cCol)
+				{
+					s = s + mGame.getElementAndPent(cCol, cRow) + " ";
+				}
+				s = s + "\n";
+			}
+			return s;
+		}
+		
+		public int getElement (int x, int y)
+		{
+			return mGame.getElement (x, y);
+		}
+		
+		public int getElementAndPent (int x, int y)
+		{
+			return mGame.getElementAndPent (x, y);
+		}
+		
+		public int getHeight()
+		{
+			return mGame.getHeight();
+		}
+		
+		public int getWidth()
+		{
+			return mGame.getWidth();
+		}
+		
+		public int getFilledHeight (int col)
+		{
+			return mGame.getFilledHeight (col);
 		}
 		
 		public boolean checkMove (Direction d)
@@ -68,26 +121,26 @@ public class Game implements Cloneable
 		
 		public void move (Direction d)
 		{
-			try { mGame.move(d); }
+			mGame.move(d);
+			try {  }
 			catch (Exception e) {}
 		}
 		
 		public void pentRotate()
 		{
-			try { mGame.turn(Direction.UP); }
-			catch (Exception e) {}
+			mGame.turn(Direction.RIGHT);
 		}
 		
 		public void fallPlace()
 		{
-			try { mGame.fallPlace(); }
-			catch (Exception e) {}
+			long scoreBefore = mGame.getCurrScore().getScore();
+			mGame.fallPlace(); 
+			mDeltaScore = (int) (mGame.getCurrScore().getScore() - scoreBefore);
 		}
 		
 		public void pentPicker()
 		{
-			try { mGame.pentPicker(); }
-			catch (Exception e) {}
+			mGame.pentPicker();
 		}
 		
 		public void pickPent (int index)
@@ -97,13 +150,14 @@ public class Game implements Cloneable
 		}
 		
 		private Game mGame;
+		private int mDeltaScore;
 	}
 	
 	public static boolean DEBUG = false;
 	
 	//suggestion: use classes implementing interface to set, store and modify timer
 	//add to pending changes file, once it exists
-	public final long mFALL_TIME = 750;
+	public final long mFALL_TIME = 250;
 	//Constructors
 	public Game(Board initBoard, ArrayList<Pentomino> pieces, Player player, HScore currentHScores)
 	{
@@ -113,7 +167,7 @@ public class Game implements Cloneable
 		//look for nicer solution
 		blocks = (ArrayList<Pentomino>)pieces.clone();
 		mPlayer = player;
-		mHighScore = currentHScores;
+		mHighScore = currentHScores.clone();
 		mListeners = new HashMap <GameAction, ArrayList <IGameListener>>();
 		mIsOver = false;
 		mIsPaused = true;
@@ -203,6 +257,20 @@ public class Game implements Cloneable
 	}
 	
 	/**
+	 * @param col column
+	 * @return index of the last unfilled cell (counting from top) (-1 if there is none)
+	 */
+	public int getFilledHeight (int col)
+	{
+		assert (col >= 0 && col < getWidth());
+		int closeIndex = field.getCloseRow(Direction.DOWN, new Position (col, 0).getPosNum(getHeight()));
+		if (closeIndex == -1)
+			return (getHeight() - 1);
+		else 
+			return (closeIndex - 1);
+	}
+	
+	/**
 	 * @param x column of cell
 	 * @param y row of cell
 	 * @return content of specified cell
@@ -277,7 +345,8 @@ public class Game implements Cloneable
 			below.addY (1);
 			/*if (below.getY() >= field.getHeight() && 
 				field.pentFits(pentClone, below.getPosNum (field.getHeight())))*/
-			if (field.pentFits(pentClone, below.getPosNum (getHeight())))
+			if (pentPosition.getY() + pentUsed.getHeight() <= field.getHeight() && 
+					field.pentFits(pentClone, below.getPosNum (getHeight())))
 				return true;
 		}
 		return false;
@@ -441,7 +510,7 @@ public class Game implements Cloneable
 		Random random = new Random();
 		int index = random.nextInt(blocks.size());
 		pentUsed = blocks.get(index);
-		pentPosition = new Position((int)Math.ceil(field.getWidth() / 2),0);
+		pentPosition = new Position((int)Math.ceil(field.getWidth() / 2), 0);
 		notifyListeners (GameAction.PICK);
 		if (DEBUG)
 			System.out.println ("new pent picked");
@@ -568,17 +637,6 @@ public class Game implements Cloneable
 		return value;
 	}
 	
-	//Cloning method
-	public Game clone()
-	{
-		try 
-		{ 
-			Game cloned = (Game)super.clone(); 
-			return cloned;
-		}
-		catch (CloneNotSupportedException e) {assert (false); }
-		return null;
-	}
 	
 	
 	//Contains a Board

@@ -20,9 +20,9 @@ public class GeneticBot extends Bot
 	 * @param evoCycles number of mutation-selection cycles
 	 * @throws FileNotFoundException
 	 */
-	public GeneticBot(PerfMeasure pMeasure, File nameDataBase, double mutationProb, int popSize, int searchDepth, int evoCycles) throws FileNotFoundException
+	public GeneticBot(ArrayList <PerfMeasure> pMeasures, ArrayList <Double> weights, File nameDataBase, double mutationProb, int popSize, int searchDepth, int evoCycles) throws FileNotFoundException
 	{
-		super(pMeasure, nameDataBase);
+		super(pMeasures, weights, nameDataBase);
 		mPopSize = popSize;
 		mSearchDepth = searchDepth;
 		mEvoCycles = evoCycles;

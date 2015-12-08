@@ -12,6 +12,7 @@ public class NameGenerator
 	public NameGenerator (File genList) throws FileNotFoundException
 	{
 		assert (genList != null && genList.canRead());
+		mNameMat = new ArrayList<ArrayList<String>>();
 		read (genList);
 		
 	}

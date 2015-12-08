@@ -10,6 +10,7 @@ import java.util.ArrayList;
 //abstract class every bot should inherit from
 public abstract class Bot implements Player
 {	
+	public static boolean DEBUG = false;
 	//non-static section
 	//public section
 	public class PickListener implements IGameListener
@@ -48,9 +49,11 @@ public abstract class Bot implements Player
 	 * @param nameBase data base of names to be used by the NameGenerator
 	 * @throws FileNotFoundException
 	 */
-	public Bot (PerfMeasure pMeasure, File nameBase) throws FileNotFoundException
+	public Bot (ArrayList <PerfMeasure> pMeasures, ArrayList <Double> weights, File nameBase) throws FileNotFoundException
 	{
-		mPMeasure = pMeasure;
+		assert (pMeasures.size() == weights.size());
+		mPMeasures = pMeasures;
+		mPMeasureWeights = (ArrayList<Double>) weights.clone();
 		NameGenerator chooseName = new NameGenerator (nameBase);
 		mName = chooseName.getName();
 		mIdealMove = null;
@@ -69,9 +72,14 @@ public abstract class Bot implements Player
 	 * @param state current state of game
 	 * @return performance measure return value
 	 */
-	public int evaluateState (Game.SimulGame state)
+	public double evaluateState (Game.SimulGame state)
 	{
-		return mPMeasure.getPerf(state);
+		double weightedSum = 0.0;
+		for (int cMeasure = 0; cMeasure < mPMeasures.size(); ++cMeasure)
+		{
+			weightedSum += mPMeasures.get (cMeasure).getPerf (state) * mPMeasureWeights.get(cMeasure);
+		}
+		return weightedSum;
 	}
 	
 	/**
@@ -81,10 +89,18 @@ public abstract class Bot implements Player
 	 */
 	public GameMove getMove()
 	{
-		assert (!mIdealMove.isEmpty());
+		if (mIdealMove == null || mIdealMove.isEmpty())
+		{
+			if (DEBUG)
+				System.out.println ("Bot returns move " + GameMove.NONE);
+			return GameMove.NONE;
+		}
 		GameMove nextMove = mIdealMove.getMove();
 		mIdealMove.eraseHead();
+		if (DEBUG)
+			System.out.println ("Bot returns move " + nextMove);
 		return nextMove;
+		
 	}
 	
 	//protected section
@@ -173,7 +189,13 @@ public abstract class Bot implements Player
 			assert (!moveExecuted());
 			mMoveOccurred = true;
 			mState.fallPlace();
-			mPScore = mPMeasure.getPerf(mState);
+			mPScore = evaluateState (mState);
+			
+			if (DEBUG)
+			{
+				System.out.println ("Move tested " + mMoveQueue.toString() + " score = " + mPScore);
+				System.out.println (mState.toString());
+			}
 		}
 		
 		/**
@@ -198,7 +220,7 @@ public abstract class Bot implements Player
 		 * Precondition: Move was executed already
 		 * @return performance value of internal state
 		 */
-		public int getPMeasure ()
+		public double getPMeasure ()
 		{
 			assert (moveExecuted());
 			return mPScore;
@@ -263,7 +285,7 @@ public abstract class Bot implements Player
 		private Game.SimulGame mState;
 		private Direction mMoveDirection;
 		private int mRemainRotations;
-		private int mPScore;
+		private double mPScore;
 		private boolean mMoveOccurred;
 	}
 	
@@ -280,7 +302,8 @@ public abstract class Bot implements Player
 	
 	//private section
 	
-	private PerfMeasure mPMeasure;
+	private ArrayList <PerfMeasure> mPMeasures;
+	private ArrayList <Double> mPMeasureWeights;
 	private String mName;
 	private InstructionSet mIdealMove;
 }

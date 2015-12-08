@@ -16,9 +16,9 @@ public class GreedyBot extends Bot {
 	 * @param nameBase data base of names to be used by the NameGenerator
 	 * @throws FileNotFoundException
 	 */
-	public GreedyBot(PerfMeasure pMeasure, File nameDataBase) throws FileNotFoundException 
+	public GreedyBot(ArrayList <PerfMeasure> pMeasures, ArrayList <Double> weights, File nameDataBase) throws FileNotFoundException 
 	{
-		super(pMeasure, nameDataBase);
+		super(pMeasures, weights, nameDataBase);
 	}
 	
 	/**
@@ -51,7 +51,7 @@ public class GreedyBot extends Bot {
 				else
 					rotDupl = true;
 			}
-		} while (rotDupl);
+		} while (!rotDupl);
 		
 		//stores possible moves as InstructionSets
 		ArrayList <InstructionSet> pblts = new ArrayList <InstructionSet>();
@@ -89,10 +89,10 @@ public class GreedyBot extends Bot {
 		ArrayList <InstructionSet> moves = genPossibleMoves (new InstructionSet (state));
 		
 		//search for move maximizing the performance measure
-		int pmMax = Integer.MIN_VALUE;
+		double pmMax = Double.MIN_VALUE;
 		for (InstructionSet move : moves)
 		{
-			int pmCurrent = move.getPMeasure();
+			double pmCurrent = move.getPMeasure();
 			if (pmCurrent > pmMax)
 			{
 				pmMax = pmCurrent;

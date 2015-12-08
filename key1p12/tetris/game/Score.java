@@ -111,6 +111,15 @@ public class Score implements Comparable <Score>, Cloneable
 		mLock = true;
 	}
 	
+	
+	protected Score (Score copy)
+	{
+		mScoreComputer = copy.mScoreComputer;
+		mScore = copy.mScore;
+		mName = copy.mName;
+		mLock = copy.mLock;
+	}
+	
 	/**
 	 * clone constructor
 	 * @param mScore2 score of the object to be cloned
