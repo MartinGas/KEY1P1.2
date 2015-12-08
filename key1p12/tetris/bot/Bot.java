@@ -55,7 +55,7 @@ public abstract class Bot implements Player
 		mPMeasures = pMeasures;
 		mPMeasureWeights = (ArrayList<Double>) weights.clone();
 		NameGenerator chooseName = new NameGenerator (nameBase);
-		mName = chooseName.getName();
+		mName = "Bot" + chooseName.getName();
 		mIdealMove = null;
 	}
 	

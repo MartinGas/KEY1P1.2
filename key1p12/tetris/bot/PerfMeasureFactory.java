@@ -13,6 +13,7 @@ public class PerfMeasureFactory
 		switch (p)
 		{
 		case SCORE: return new ScorePerformance(mMaxScore);
+		case HEIGHT: return new TotalHeightPerformance();
 		case RECTANGLE: return new RectangularPerformance();
 		case HEIGHTDIFFERENCE: return new HeightDiffPerformance();
 		case DENSITY: return new DensityPerformance();

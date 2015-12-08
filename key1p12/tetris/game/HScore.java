@@ -114,16 +114,16 @@ public class HScore extends Score
 		if (!super.isLocked())
 		{
 			super.lock();
-			insertCurrentToList();
-			PrintWriter fileWriter = new PrintWriter (mStorage);
-			fileWriter.println (getNumberEntries());
-			for (ListIterator<Score> li = mHighScores.listIterator(); li.hasNext(); )
-			{
-				Score write = li.next();
-				fileWriter.println (write.getScore() + " " + write.getName());
-			}
-			fileWriter.close();
 		}
+		insertCurrentToList();
+		PrintWriter fileWriter = new PrintWriter (mStorage);
+		fileWriter.println (getNumberEntries());
+		for (ListIterator<Score> li = mHighScores.listIterator(); li.hasNext(); )
+		{
+			Score write = li.next();
+			fileWriter.println (write.getScore() + " " + write.getName());
+		}
+		fileWriter.close();
 	}
 	
 	/**

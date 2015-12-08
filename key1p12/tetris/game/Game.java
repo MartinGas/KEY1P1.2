@@ -135,6 +135,7 @@ public class Game implements Cloneable
 		{
 			long scoreBefore = mGame.getCurrScore().getScore();
 			mGame.fallPlace(); 
+			mGame.rowClearer();
 			mDeltaScore = (int) (mGame.getCurrScore().getScore() - scoreBefore);
 		}
 		
@@ -157,7 +158,7 @@ public class Game implements Cloneable
 	
 	//suggestion: use classes implementing interface to set, store and modify timer
 	//add to pending changes file, once it exists
-	public final long mFALL_TIME = 250;
+	public static long mFALL_TIME = 500;
 	//Constructors
 	public Game(Board initBoard, ArrayList<Pentomino> pieces, Player player, HScore currentHScores)
 	{
@@ -222,6 +223,16 @@ public class Game implements Cloneable
 				break;
 			}		
 		}
+	}
+	
+	/**
+	 * @return High score object if game is over, null otherwise
+	 */
+	public HScore getHighScoreList()
+	{
+		if (mIsOver)
+			return mHighScore;
+		return null;
 	}
 	
 	/**
@@ -579,6 +590,7 @@ public class Game implements Cloneable
 	private void setGameOver()
 	{
 		mIsOver = true;
+		mHighScore.lock();
 	}
 	
 	public void placer()

@@ -143,13 +143,13 @@ public class Tetris
 			{
 				try
 				{
-					mHSList.writeToFile();
+ 					mGame.getHighScoreList().writeToFile();
 				}
 				catch (IOException e)
 				{
 					System.err.println ("Unable to save changes to high score");
 				}
-				mGui.setUpGameOverPanel(mHSList);
+				mGui.setUpGameOverPanel (mGame.getHighScoreList());
 				mGui.showPanel (TetrisGui.ScreenType.OVER);
 			}
 		}

@@ -77,14 +77,14 @@ public class TetStatPanel extends JPanel
 	
 	public void updateCurrentScore (Score current)
 	{
-		mLabelMaxName.setText ("player: " + current.getName());
-		mLabelMaxScore.setText ("score: " + current.getScore());
+		mLabelCurrName.setText ("player: " + current.getName());
+		mLabelCurrScore.setText ("score: " + current.getScore());
 	}
 	
 	public void updateHighScore (Score high)
 	{
-		mLabelCurrName.setText ("player: " + high.getName());
-		mLabelCurrScore.setText ("score: " + high.getScore());
+		mLabelMaxName.setText ("player: " + high.getName());
+		mLabelMaxScore.setText ("score: " + high.getScore());
 	}
 	
 	//private Score mMax, mCurr;
