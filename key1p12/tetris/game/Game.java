@@ -187,8 +187,7 @@ public class Game implements Cloneable
 		{
 			if (DEBUG)
 				System.out.println ("Resuming game");
-			mIsPaused = false;
-			mFallTimer.reset();
+			resume();
 		}
 		//if pentomino is at the bottom
 		if (!checkMove (Direction.DOWN))
@@ -437,7 +436,15 @@ public class Game implements Cloneable
 			}
 		}
 	}
-
+	
+	
+	private void resume()
+	{
+		mIsPaused = false;
+		mFallTimer.reset();
+		notifyListeners (GameAction.RESUME);
+	}
+	
 	/**@return void
 	 * Makes the pentomino fall by 1 block after a set amount of time has elapsed
 	 */

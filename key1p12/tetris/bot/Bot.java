@@ -22,7 +22,7 @@ public abstract class Bot implements Player
 		@Override
 		public boolean isSensitive (GameAction event) 
 		{
-			if (event == GameAction.PICK)
+			if (event == GameAction.PICK || event == GameAction.RESUME)
 				return true;
 			return false;
 		}
