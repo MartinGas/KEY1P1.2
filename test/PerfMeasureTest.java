@@ -3,15 +3,18 @@ package test;
 import java.io.*;
 import java.util.ArrayList;
 
-import key1p12.tetris.bot.DensityPerformance;
-import key1p12.tetris.bot.HeightDiffPerformance;
-import key1p12.tetris.bot.RectangularPerformance;
+import org.junit.Test;
+import static org.junit.Assert.*;
+
+import key1p12.tetris.bot.*;
 import key1p12.tetris.game.*;
 import key1p12.tetris.game.Game.SimulGame;
 
 public class PerfMeasureTest 
 {
-	public static void main (String[] args) throws IOException
+	public static double EPSILON = 0.0005;
+	
+	public PerfMeasureTest() throws IOException
 	{
 		Board b = new Board (13, 10);
 		ArrayList <Pentomino> ps = Pentomino.createsPentList();
@@ -23,40 +26,73 @@ public class PerfMeasureTest
 			b.placePent(place, bottomPos.getPosNum(b.getHeight()));
 		}
 		
-		b.printBoard();
+		//b.printBoard();
 		
 		File hsFile = new File ("highscores.txt");
 		if (!hsFile.exists())
 			HScore.generateHighScoreFile(hsFile, 10);
-		HScore hsList = new HScore(hsFile, "bla", new ExponentialScore(1, 1, 1));
+		ScoreCountable sComputer = new ExponentialScore (2, 1, 1);
+		HScore hsList = new HScore(hsFile, "bla", sComputer);
 		
-		Game g = new Game (b, ps, new HumanPlayer(""), hsList);
-		SimulGame sg = new Game.SimulGame (g);
+		mGame = new Game (b, ps, new HumanPlayer(""), hsList);
+		mSimulGame = new Game.SimulGame (mGame);
 		
-		testHeightDiff(sg);
-		testRect(sg);
-		testDensity(sg);
-		
+		int maxHeight = 5, heightTolerance = 1;
+		mPFax = new PerfMeasureFactory();
+		mPFax.setMaxScore ((int)sComputer.calculateScore(maxHeight));
+		mPFax.setTolerance (heightTolerance);
 	}
+	/*	test Board
+	 * 	0 0 0 0 0 0 0 0 0 0 0 0 0 
+		0 0 0 0 0 0 0 0 0 0 0 0 0 
+		0 0 0 0 0 0 0 0 0 0 0 0 0 
+		0 0 0 0 0 0 0 0 0 0 0 0 0 
+		0 0 0 0 0 0 0 0 0 0 0 0 0 
+		0 0 0 0 0 0 0 0 0 0 0 0 0 
+		0 0 0 0 0 0 0 0 0 0 0 0 0 
+		0 2 0 0 3 3 4 0 0 5 0 0 0 
+		2 2 2 3 3 0 4 0 0 5 5 0 0 
+		0 2 0 0 3 0 4 4 4 0 5 5 0 
+	 */
 	
-	public static void testHeightDiff (SimulGame g)
+	@Test
+	public void testHeightDiff ()
 	{
-		System.out.print ("height difference performance ");
-		System.out.println (new HeightDiffPerformance().getPerf(g));
+		PerfMeasure hdp = mPFax.getPMeasure (PerfMeasureType.HEIGHTDIFFERENCE);
+		double perf = hdp.getPerf (mSimulGame);
+		double expected = 7.0 / 9.0;
+		assertTrue (perf >= expected - EPSILON && perf <= expected + EPSILON);
 	}
 	
-	public static void testRect (SimulGame g)
+	@Test
+	public void testTotalHeight ()
 	{
-		System.out.print ("rectangular performance ");
-		System.out.println (new RectangularPerformance().getPerf(g));
+		PerfMeasure hp = mPFax.getPMeasure (PerfMeasureType.HEIGHT);
+		double perf = hp.getPerf(mSimulGame);
+		double expected = 7.0 / 9.0;
+		assertTrue (perf >= expected - EPSILON && perf <= expected + EPSILON);
 	}
 	
-	public static void testDensity (SimulGame g)
+	@Test
+	public void testRect ()
 	{
-		System.out.print ("Density performance ");
-		System.out.println (new DensityPerformance().getPerf (g));
+		PerfMeasure rp = mPFax.getPMeasure (PerfMeasureType.RECTANGLE);
+		double perf = rp.getPerf(mSimulGame);
+		double expected = (13.0 - 9.0) / 13.0;
+		assertTrue (perf >= expected - EPSILON && perf <= expected + EPSILON);
+	}
+	
+	@Test
+	public void testDensity ()
+	{
+		PerfMeasure dp = mPFax.getPMeasure (PerfMeasureType.DENSITY);
+		double perf = dp.getPerf(mSimulGame);
+		double expected = 20.0 / 26.0;
+		assertTrue (perf >= expected - EPSILON && perf <= expected + EPSILON);
 	}
 	
 	
-	
+	private PerfMeasureFactory mPFax;
+	private Game mGame;
+	private Game.SimulGame mSimulGame;
 }

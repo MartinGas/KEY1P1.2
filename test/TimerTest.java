@@ -1,7 +1,9 @@
-/*
+package test;
 
 import static org.junit.Assert.*;
 import org.junit.Test;
+
+import key1p12.tetris.game.Timer;
 
 public class TimerTest
 {
@@ -26,6 +28,7 @@ public class TimerTest
 	{
 		long delay = 100;
 		Timer test = new Timer(50);
+		test.start();
 		try
 		{
 			Thread.sleep (delay);
@@ -39,6 +42,7 @@ public class TimerTest
 	{
 		int delay = 50;
 		Timer test = new Timer (delay);
+		test.start();
 		try
 		{
 			Thread.sleep (delay + mEPSILON);
@@ -52,6 +56,7 @@ public class TimerTest
 	{
 		int delays[] = {25, 10};
 		Timer test = new Timer (50);
+		test.start();
 		try
 		{
 			Thread.sleep(delays[0]);
@@ -61,5 +66,23 @@ public class TimerTest
 		}
 		catch (Exception e) {}
 	}
+	
+	@Test
+	public void startStopTest()
+	{
+		int delay = 25, timerDelay = 50;
+		Timer test = new Timer (timerDelay);
+		try
+		{
+			Thread.sleep (delay);
+			assertTrue (test.getElapsedTime() == 0);
+			
+			test.start();
+			Thread.sleep (delay);
+			assertTrue (test.getElapsedTime() >= delay && test.getElapsedTime() <= delay + mEPSILON);
+			test.stop();
+			assertTrue (test.getElapsedTime() >= delay && test.getElapsedTime() <= delay + mEPSILON);
+		}
+		catch (Exception e) {}
+	}
 }
-*/

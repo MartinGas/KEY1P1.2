@@ -26,7 +26,7 @@ public class HeightDiffPerformance implements PerfMeasure {
 		if (lowest - highest < mTolerance)
 			return 1;
 		else
-			return (double)(state.getHeight() - lowest + highest - mTolerance) / (double)(state.getHeight() - mTolerance);
+			return (double)(state.getHeight() - lowest + highest) / (double)(state.getHeight() - mTolerance);
 	}
 
 	@Override

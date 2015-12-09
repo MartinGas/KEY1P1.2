@@ -21,7 +21,9 @@ public class TotalHeightPerformance implements PerfMeasure {
 				max = state.getFilledHeight(cCol) + 1;
 		}
 		
-		return (double)(max + mTolerance) / (double)(state.getHeight() - mTolerance);
+		if (max > state.getHeight() - mTolerance)
+			return 1;
+		return (double)max / (double)(state.getHeight() - mTolerance);
 	}
 
 	@Override

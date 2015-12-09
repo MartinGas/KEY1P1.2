@@ -10,32 +10,68 @@ public class Timer implements Cloneable
 		return System.currentTimeMillis();
 	}	
 	
-	/** constructs Timer using the current time as reference**/
+	/** constructs Timer using the current time as reference
+	 * @param triggerTime total delay of timer in milliseconds
+	 * **/
 	public Timer (long triggerTime)
 	{
 		mTriggerTime = triggerTime;
-		this.reset();
+		mLastTime = 0;
+		mStopTime = 0;	
+		//timer state: timer initially paused
 	}
 	
 	/**constructs Timer using a point in time
-	* @param pointInTime Time to be used by Timer. Cannot be in the future**/
+	* @param pointInTime point when timer was started/reset last in milliseconds
+	* @param triggerTime total delay of timer in milliseconds**/
 	public Timer (long pointInTime, long triggerTime)
 	{
 		assert (pointInTime <= Timer.getSystemTime());
 		mTriggerTime = triggerTime;
 		mLastTime = pointInTime;
+		mStopTime = Timer.getSystemTime();
 	}
 	
-	/** resets the reference of the Timer to the current time**/
+	/**resets the reference of the Timer to the current time
+	 * Postcondition: elapsed time = 0 
+	**/
 	public void reset()
 	{
-		mLastTime = Timer.getSystemTime();
+		//if timer was paused
+		if (isStopped())
+			mLastTime = mStopTime;
+		else
+			mLastTime = Timer.getSystemTime();
+	}
+	
+	/**starts the timer**/
+	public void start()
+	{
+		if (isStopped())
+		{
+			mStopTime = 0;
+			mLastTime = Timer.getSystemTime() - mLastTime + mStopTime;
+		}
+	}
+	
+	
+	public void stop()
+	{
+		mStopTime = Timer.getSystemTime();
+	}
+	
+	public boolean isStopped()
+	{
+		return (mLastTime <= mStopTime);
 	}
 	
 	/** @return the time elapsed between the point in time referenced and now **/
 	public long getElapsedTime()
 	{
-		return (getSystemTime() - mLastTime);
+		if (mStopTime < mLastTime)
+			return (getSystemTime() - mLastTime);
+		else
+			return (mStopTime - mLastTime);
 	}
 	
 	public boolean hasElapsed()
@@ -44,5 +80,5 @@ public class Timer implements Cloneable
 	}
 	
 	//stores reference to point in time as obtainted by getSystemTime
-	private long mLastTime, mTriggerTime;
+	private long mLastTime, mStopTime, mTriggerTime;
 }

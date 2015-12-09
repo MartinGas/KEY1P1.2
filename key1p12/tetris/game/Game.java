@@ -189,17 +189,7 @@ public class Game implements Cloneable
 				System.out.println ("Resuming game");
 			resume();
 		}
-		//if pentomino is at the bottom
-		if (!checkMove (Direction.DOWN))
-		{
-			System.out.println ("Pent is at bottom");
-			//place the pentomino on the board first
-			placer();
-			rowClearer();
-			pentPicker();
-			if (gameOverChecker())
-				setGameOver();
-		}
+		
 		if (!isGameOver())
 		{
 			if (DEBUG)
@@ -220,8 +210,21 @@ public class Game implements Cloneable
 			break;
 			default: assert (false);
 				break;
-			}		
+			}
+			
+			//if pentomino is at the bottom
+			if (!checkMove (Direction.DOWN))
+			{
+				System.out.println ("Pent is at bottom");
+				//place the pentomino on the board first
+				placer();
+				rowClearer();
+				pentPicker();
+				if (gameOverChecker())
+					setGameOver();
+			}
 		}
+		
 	}
 	
 	/**
