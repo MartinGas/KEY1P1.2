@@ -4,6 +4,11 @@ import key1p12.tetris.game.Game.SimulGame;
 
 public class HeightDiffPerformance implements PerfMeasure {
 
+	public HeightDiffPerformance (int tolerance)
+	{
+		mTolerance = tolerance;
+	}
+	
 	@Override
 	public double getPerf (SimulGame state) 
 	{
@@ -17,7 +22,11 @@ public class HeightDiffPerformance implements PerfMeasure {
 			else if (height > lowest)
 				lowest = height;
 		}
-		return (double)(state.getHeight() - lowest + highest) / (double)state.getHeight();
+		
+		if (lowest - highest < mTolerance)
+			return 1;
+		else
+			return (double)(state.getHeight() - lowest + highest - mTolerance) / (double)(state.getHeight() - mTolerance);
 	}
 
 	@Override
@@ -25,5 +34,6 @@ public class HeightDiffPerformance implements PerfMeasure {
 		// TODO Auto-generated method stub
 		return true;
 	}
-
+	
+	private int mTolerance;
 }

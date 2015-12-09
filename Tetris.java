@@ -264,7 +264,9 @@ public class Tetris
 			ArrayList <PerfMeasure> pms = new ArrayList <PerfMeasure>();
 			ArrayList <Double> weights = new ArrayList <Double>();
 			
-			PerfMeasureFactory pmFax = new PerfMeasureFactory((int) scoreComp.calculateScore(XTOMINO));
+			PerfMeasureFactory pmFax = new PerfMeasureFactory();
+			pmFax.setMaxScore ((int) scoreComp.calculateScore(XTOMINO));
+			pmFax.setTolerance (XTOMINO - 1);
 			
 			if (setup.getPerfMeasureType() != PerfMeasureType.CUSTOM)
 			{

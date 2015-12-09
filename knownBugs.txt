@@ -2,8 +2,7 @@
 #if you fixed a bug place it in the *fixed* section
 #if you found a bug place it right before the fixed section
 Game.java
-- strange behavior when placing i-pent horizontally. Suddenly moves to somewhere else...
-
+Individual cells do not fall down when cells hindering their fall were removed (hard to replicate situation)
 
 
 *fixed*
@@ -11,3 +10,4 @@ Game.java
 - fix responsibility issues in check checkRotate, checkFall (Eric, 09.11, 15)
 - fallPlace does not place the pentomino used in the bottom most location. Wrong code, see comments (anonymous)
 - pentFits, placePent, putLeftTop: do not behave as expected in this context: left top position of pentomino will be evaluated as left top position of first filled cell in pentomino (Eric, Martin)
+- strange behavior when placing i-pent horizontally. Suddenly moves to somewhere else... (Eric, 09.12.15)

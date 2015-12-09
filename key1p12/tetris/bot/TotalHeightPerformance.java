@@ -4,6 +4,11 @@ import key1p12.tetris.game.Game.SimulGame;
 
 public class TotalHeightPerformance implements PerfMeasure {
 
+	public TotalHeightPerformance (int tolerance)
+	{
+		mTolerance = tolerance;
+	}
+	
 	@Override
 	public double getPerf(SimulGame state) 
 	{
@@ -16,7 +21,7 @@ public class TotalHeightPerformance implements PerfMeasure {
 				max = state.getFilledHeight(cCol) + 1;
 		}
 		
-		return (double)max / (double)state.getHeight();
+		return (double)(max + mTolerance) / (double)(state.getHeight() - mTolerance);
 	}
 
 	@Override
@@ -24,5 +29,6 @@ public class TotalHeightPerformance implements PerfMeasure {
 		// TODO Auto-generated method stub
 		return true;
 	}
-
+	
+	private int mTolerance;
 }
