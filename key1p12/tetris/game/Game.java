@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Random;
 
-public class Game implements Cloneable
+public class Game
 {
 	public static class SimulGame implements Cloneable
 	{
@@ -158,11 +158,12 @@ public class Game implements Cloneable
 	
 	//suggestion: use classes implementing interface to set, store and modify timer
 	//add to pending changes file, once it exists
-	public static long mFALL_TIME = 500;
+	public static long mFALL_TIME = 1000, mPLACE_TIME = 250;
 	//Constructors
 	public Game(Board initBoard, ArrayList<Pentomino> pieces, Player player, HScore currentHScores)
 	{
 		mFallTimer = new Timer (mFALL_TIME);
+		mPlaceTimer = new Timer (mPLACE_TIME);
 		
 		field = initBoard.clone();
 		//look for nicer solution
@@ -215,14 +216,20 @@ public class Game implements Cloneable
 			//if pentomino is at the bottom
 			if (!checkMove (Direction.DOWN))
 			{
-				System.out.println ("Pent is at bottom");
-				//place the pentomino on the board first
-				placer();
-				rowClearer();
-				pentPicker();
-				if (gameOverChecker())
-					setGameOver();
+				//if place timer should be activated
+				if (mPlaceTimer.isStopped())
+				{
+					mPlaceTimer.start();
+					//if (DEBUG)
+						System.out.println ("Start place timer " + mPlaceTimer.getElapsedTime());
+				}
+				//if place timer has elapsed
+				if (mPlaceTimer.hasElapsed())
+					placer();
 			}
+			//if place timer is running but pentomino can fall
+			else if (!mPlaceTimer.isStopped())
+				mPlaceTimer.stop();
 		}
 		
 	}
@@ -421,6 +428,8 @@ public class Game implements Cloneable
 	public void pause()
 	{
 		mIsPaused = true;
+		mFallTimer.stop();
+		mPlaceTimer.stop();
 	}
 	
 	/**
@@ -444,7 +453,8 @@ public class Game implements Cloneable
 	private void resume()
 	{
 		mIsPaused = false;
-		mFallTimer.reset();
+		mFallTimer.start();
+		mPlaceTimer.start();
 		notifyListeners (GameAction.RESUME);
 	}
 	
@@ -515,10 +525,9 @@ public class Game implements Cloneable
 	{
 		while (this.checkMove(Direction.DOWN))
 			this.move(Direction.DOWN);
-		placer();
-		notifyListeners (GameAction.FALL);
 		if (DEBUG)
 			System.out.println ("Pent dropped");
+		placer();
 	}
 	
 	/**@return void
@@ -528,7 +537,7 @@ public class Game implements Cloneable
 	public void pentPicker() 
 	{
 		mFallTimer.reset();
-		Random random = new Random();
+		Random random = new Random ();
 		int index = random.nextInt(blocks.size());
 		pentUsed = blocks.get(index);
 		pentPosition = new Position((int)Math.ceil(field.getWidth() / 2), 0);
@@ -603,10 +612,19 @@ public class Game implements Cloneable
 		mHighScore.lock();
 	}
 	
-	public void placer()
+	private void placer()
 	{
+		if (DEBUG)
+			System.out.println ("Pent is placed");
+		//place the pentomino on the board first
 		int pos = pentPosition.getPosNum(field.getHeight());
 		field.placePent(pentUsed, pos);
+		rowClearer();
+		pentPicker();
+		if (gameOverChecker())
+			setGameOver();
+		mPlaceTimer.reset();
+		mPlaceTimer.stop();
 	}
 	
 	/** @return position of left top of current pentomino
@@ -619,7 +637,7 @@ public class Game implements Cloneable
 	
 	/** @return new postion of left top after 'smart' rotating
 	 */ 
-	public Position smartRotate()
+	private Position smartRotate()
 	{
 		int moveLeft = 0;
 		int moveUp = 0;
@@ -682,6 +700,9 @@ public class Game implements Cloneable
 	
 	//timer indicating whether pentomino should fall
 	private Timer mFallTimer;
+	
+	//timer indicating when pentomino should be placed permanently after touching bottom
+	private Timer mPlaceTimer;
 	
 	//maps game actions to related listeners added to the game
 	private HashMap <GameAction, ArrayList <IGameListener>> mListeners;

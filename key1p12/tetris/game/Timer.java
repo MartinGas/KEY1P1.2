@@ -49,8 +49,8 @@ public class Timer implements Cloneable
 	{
 		if (isStopped())
 		{
-			mStopTime = 0;
 			mLastTime = Timer.getSystemTime() - mLastTime + mStopTime;
+			mStopTime = 0;
 		}
 	}
 	
