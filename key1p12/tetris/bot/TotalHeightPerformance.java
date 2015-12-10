@@ -12,6 +12,8 @@ public class TotalHeightPerformance implements PerfMeasure {
 	@Override
 	public double getPerf(SimulGame state) 
 	{
+		if (state.isGameOver())
+			return 0;
 		//largest height = lowest value
 		int max = state.getHeight();
 		for (int cCol = 0; cCol < state.getWidth(); ++cCol)

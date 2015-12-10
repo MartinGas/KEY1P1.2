@@ -12,6 +12,8 @@ public class HeightDiffPerformance implements PerfMeasure {
 	@Override
 	public double getPerf (SimulGame state) 
 	{
+		if (state.isGameOver())
+			return 0;
 		//store highest stack and lowest stack of cells
 		int highest = state.getHeight(), lowest = 0;
 		for (int cCol = 0; cCol < state.getWidth(); ++cCol)

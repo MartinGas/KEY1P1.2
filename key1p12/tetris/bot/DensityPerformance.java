@@ -7,6 +7,8 @@ public class DensityPerformance implements PerfMeasure {
 	@Override
 	public double getPerf (SimulGame state) 
 	{
+		if (state.isGameOver())
+			return 0;
 		//store start & end of current segment
 		int cColStart = 0, cColEnd = 0;
 		//store number of filled & total cells

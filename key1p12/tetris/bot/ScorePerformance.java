@@ -16,6 +16,8 @@ public class ScorePerformance implements PerfMeasure {
 	 */
 	public double getPerf (SimulGame state) 
 	{
+		if (state.isGameOver())
+			return 0;
 		return state.getLastScoreDifference() / mMaxScore;
 	}
 

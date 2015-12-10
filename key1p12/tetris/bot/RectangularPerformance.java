@@ -12,6 +12,8 @@ public class RectangularPerformance implements PerfMeasure
 	@Override
 	public double getPerf (SimulGame state) 
 	{
+		if (state.isGameOver())
+			return 0;
 		int cRects = 0;
 		int lastHeight = state.getHeight();
 		for (int cCol = 0; cCol < state.getWidth(); ++cCol)
