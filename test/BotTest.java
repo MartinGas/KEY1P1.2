@@ -27,6 +27,8 @@ public class BotTest implements Runnable
 	 */
 	public static void main(String[] args)
 	{
+		botWaitTest(); return;
+		/*
 		int maxShapeHeight = 5;
 		HScore hsList = null;
 		ScoreCountable scoreComp = new ExponentialScore (2, 1, 1);
@@ -80,6 +82,83 @@ public class BotTest implements Runnable
 			System.out.println (e.getMessage());
 			e.printStackTrace();
 			return;
+		}*/
+	}
+	
+	public static void botWaitTest()
+	{
+		int maxShapeHeight = 5;
+		HScore hsList = null;
+		ScoreCountable scoreComp = new ExponentialScore (2, 1, 1);
+		try
+		{
+			File hsFile = new File ("mockScores.txt");
+			HScore.generateHighScoreFile(hsFile, 5);
+			hsList = new HScore (hsFile, "Tester", scoreComp);
+		}
+		catch (FileNotFoundException fnfe)
+		{
+			System.out.println ("Quit testing, could not load mock high score file");
+			return;
+		}
+		catch (IOException ioe)
+		{
+			System.out.println ("Quit testing, could not create mock high score file");
+			return;
+		}
+		
+		
+		ArrayList <PerfMeasure> pMeasures = new ArrayList<PerfMeasure>();
+		//pMeasures.add (new ScorePerformance (scoreComp.calculateScore (maxShapeHeight)));
+		//pMeasures.add (new HeightDiffPerformance (maxShapeHeight - 1));
+		pMeasures.add (new DensityPerformance());
+		ArrayList <Double> pmWeights = new ArrayList<Double>();
+		//pmWeights.add (new Double (25.0));
+		//pmWeights.add (new Double (1.2));
+		pmWeights.add (new Double (1.0));
+		PlayerFactory pFax = new GreedyBotFactory (pMeasures, pmWeights, new File ("nameDataBase.txt"));
+		
+		Board specificBoard = new Board (10, 20);
+		ArrayList <Pentomino> pents = Pentomino.createsPentList();
+		Position p = new Position (0, specificBoard.getHeight() - 5);
+		specificBoard.placePent (pents.get(11), p.getPosNum (specificBoard.getHeight()));
+		p.addX(1);
+		specificBoard.placePent (pents.get(11), p.getPosNum (specificBoard.getHeight()));
+		p.addX(1);
+		specificBoard.placePent (pents.get(11), p.getPosNum (specificBoard.getHeight()));
+		p.addX(1);
+		specificBoard.placePent (pents.get(11), p.getPosNum (specificBoard.getHeight()));
+		p.addX(3);
+		p.addY(2);
+		pents.get(2).rotate();
+		pents.get(2).rotate();
+		specificBoard.placePent (pents.get(2), p.getPosNum (specificBoard.getHeight()));
+		p.addY (-5);
+		specificBoard.placePent (pents.get(11), p.getPosNum (specificBoard.getHeight()));
+		p.addX(1);
+		specificBoard.placePent (pents.get(11), p.getPosNum (specificBoard.getHeight()));
+		p.addX(1);
+		specificBoard.placePent (pents.get(11), p.getPosNum (specificBoard.getHeight()));
+		p.addX(1);
+		specificBoard.placePent (pents.get(11), p.getPosNum (specificBoard.getHeight()));
+		
+		GameSetup setup = new GameSetup ("test");
+		setup.loadBlocks(Pentomino.createsPentList());
+		setup.loadBoard (new Board (10, 15));
+		setup.loadHighScore (hsList);
+		setup.loadPlayerFactory(pFax);
+		
+		try
+		{
+			BotTest testing = new BotTest (setup, 1);
+			testing.run();
+		}
+		catch (Exception e)
+		{
+			System.out.println ("Something went wrong while testing");
+			System.out.println (e.getMessage());
+			e.printStackTrace();
+			return;
 		}
 	}
 	
@@ -126,13 +205,18 @@ public class BotTest implements Runnable
 		Game.mFALL_TIME = FALL_DELAY;
 		Game.mPLACE_TIME = PLACE_DELAY;
 		
+		
 		for (int cRep = 0; cRep < mRepetitions; ++cRep)
 		{
 			Game game = mSetup.construct();
+			game.debugPrint();
+			System.out.println();
+			
 			while (!game.isGameOver())
 				game.play();
 			scores.add ((int) game.getCurrScore().getScore());
-			}
+			game.debugPrint();
+		}
 	}
 	
 	public void exportToCvs (File cvsFile) throws BadFormatExc, IOException

@@ -91,6 +91,15 @@ public class PerfMeasureTest
 		assertTrue (perf >= expected - EPSILON && perf <= expected + EPSILON);
 	}
 	
+	@Test
+	public void testIsolatedCells()
+	{
+		PerfMeasure ic = mPFax.getPMeasure (PerfMeasureType.ISOLATED);
+		double perf = ic.getPerf(mSimulGame);
+		double expected = 8.0 / 10.0;
+		assertTrue (perf >= expected - EPSILON && perf <= expected + EPSILON);
+	}
+	
 	
 	private PerfMeasureFactory mPFax;
 	private Game mGame;

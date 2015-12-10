@@ -130,7 +130,7 @@ public class MatrixHandler {
 	public int countColPart (int colIndex, int startIndex, int stopIndex)
 	{
 		int cnt = 0;
-		for (int cRow = startIndex; cRow < stopIndex; ++cRow)
+		for (int cRow = startIndex; cRow <= stopIndex; ++cRow)
 		{
 			if (getCell (colIndex, cRow) != 0)
 				++cnt;

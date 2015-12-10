@@ -51,9 +51,9 @@ public class GreedyBot extends Bot {
 	public ArrayList <InstructionSet> genPossibleMoves (InstructionSet noMove)
 	{
 		ArrayList <InstructionSet> possible = new ArrayList <InstructionSet>();
-		possible.add (noMove);
 		
 		ArrayList <InstructionSet> basicRotations = generateRotations (noMove);
+		basicRotations.add (noMove);
 		possible.addAll (basicRotations);
 		
 		for (InstructionSet bRot : basicRotations)
@@ -61,10 +61,12 @@ public class GreedyBot extends Bot {
 			ArrayList <InstructionSet> moveLeft = generateMoves (bRot, GameMove.MLEFT);
 			ArrayList <InstructionSet> moveRight = generateMoves (bRot, GameMove.MRIGHT);
 			ArrayList <InstructionSet> allMoves = new ArrayList <InstructionSet>();
+
 			allMoves.addAll (moveLeft);
 			allMoves.addAll (moveRight);
 			possible.addAll (allMoves);
 			
+			/* not working code: branching
 			for (InstructionSet everyMove : allMoves)
 			{
 				ArrayList <InstructionSet> leftBranches = everyMove.getBranches (Direction.LEFT);
@@ -72,11 +74,14 @@ public class GreedyBot extends Bot {
 				possible.addAll (leftBranches);
 				possible.addAll (rightBranches);
 			}
+			*/
 		}
 		
 		//apply moves for each InstructionSet
 		for (InstructionSet possibility : possible)
+		{
 			possibility.doMove();
+		}
 		
 		return possible;
 	}

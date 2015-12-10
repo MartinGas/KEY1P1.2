@@ -381,6 +381,26 @@ public class Pentomino implements Cloneable
 	{
 		return mMatrix.countColPart(colIndex, startIndex, stopIndex);
 	}
+	
+	/**
+	 * @param d direction to look for
+	 * @param posNum cell to start search at (position number format)
+	 * @return Index of column the closest filled cell is in or -1 if there are none (borders = restrictions)
+	 */
+	public int getCloseCol (Direction d, int posNum)
+	{
+		return mMatrix.getCloseCol (d, posNum);
+	}
+	
+	/**
+	 * @param d direction to look for
+	 * @param posNum cell to start search at (position number format)
+	 * @return Index of row the closest filled cell is in or -1 if there are none (borders = restrictions)
+	 */
+	public int getCloseRow (Direction d, int posNum)
+	{
+		return mMatrix.getCloseRow (d, posNum);
+	}
 
  	/** find out where the filled cell is located */
 	public int wposition(int cntr) {

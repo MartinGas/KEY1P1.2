@@ -23,6 +23,7 @@ public class PerfMeasureFactory
 		case RECTANGLE: return new RectangularPerformance();
 		case HEIGHTDIFFERENCE: return new HeightDiffPerformance (mTolerance);
 		case DENSITY: return new DensityPerformance();
+		case ISOLATED: return new IsolatedCellsPerformance();
 		}
 		
 		return null;

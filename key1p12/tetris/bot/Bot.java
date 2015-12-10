@@ -261,6 +261,15 @@ public abstract class Bot implements Player
 			mMoveQueue.removeFirst();
 		}
 		
+		public void printQueue()
+		{
+			for (GameMove gm : mMoveQueue)
+				System.out.print (gm + ", ");
+			if (moveExecuted())
+				System.out.println ("score " + mPScore);
+			System.out.println();
+		}
+		
 		/**
 		 * Creates instruction sets containing wait instructions 
 		 * @return all branches of this instruction set
@@ -373,7 +382,7 @@ public abstract class Bot implements Player
 			}
 			
 			//if wait for move right
-			if (d == Direction.LEFT && pentPos.getX() < mState.getWidth() - 1)
+			if (d == Direction.RIGHT && pentPos.getX() < mState.getWidth() - 1)
 			{
 				int pentLeftSideHeight = mState.getUsedPent().countRow (mState.getUsedPent().getWidth() - 1);
 				int firstFilledIndex = mState.getFilledHeight (pentPos.getX() + 1) + 1;

@@ -64,9 +64,14 @@ public class Game
 			return (ArrayList <Pentomino>)mGame.blocks.clone();
 		}
 		
+		public Board getBoard()
+		{
+			return mGame.field;
+		}
+		
 		public Pentomino getUsedPent()
 		{
-			return mGame.pentUsed.clone();
+			return mGame.pentUsed;
 		}
 		
 		public Score getCurrScore()
@@ -300,6 +305,16 @@ public class Game
 				mPlaceTimer.stop();
 		}
 		
+	}
+	
+	public void debugPrint()
+	{
+		for (int cRow = 0; cRow < getHeight(); ++cRow)
+		{
+			for (int cCol = 0; cCol< getWidth(); ++cCol)
+				System.out.print (getElementAndPent(cCol, cRow));
+			System.out.println();
+		}
 	}
 	
 	/**
