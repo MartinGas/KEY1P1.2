@@ -341,6 +341,46 @@ public class Pentomino implements Cloneable
 		}
 				return -1;
 	}
+	
+	/**
+	 * @param rowIndex index of row to count
+	 * @return number of set cells in row
+	 */
+	public int countRow (int rowIndex)
+	{
+		return mMatrix.countRow (rowIndex);
+	}
+	
+	/**
+	 * @param rowIndex index of row to count
+	 * @param startIndex index to start counting at
+	 * @param stopIndex index to stop counting at
+	 * @return number of set cells in row
+	 */
+	public int countRowPart (int rowIndex, int startIndex, int stopIndex)
+	{
+		return mMatrix.countRowPart (rowIndex, startIndex, stopIndex);
+	}
+	
+	/**
+	 * @param colIndex index of column to count
+	 * @return number of set cells in column
+	 */
+	public int countCol (int colIndex)
+	{
+		return mMatrix.countCol (colIndex);
+	}
+	
+	/**
+	 * @param colIndex index of column to count
+	 * @param startIndex index to start counting at
+	 * @param stopIndex index to stop counting at
+	 * @return number of set cells in column
+	 */
+	public int countColPart (int colIndex, int startIndex, int stopIndex)
+	{
+		return mMatrix.countColPart(colIndex, startIndex, stopIndex);
+	}
 
  	/** find out where the filled cell is located */
 	public int wposition(int cntr) {

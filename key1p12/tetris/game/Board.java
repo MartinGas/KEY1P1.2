@@ -365,6 +365,47 @@ public class Board implements Cloneable
 		return mMatrix.getCloseCol(direc, position);
 	}
 	
+	/**
+	 * @param rowIndex index of row to count
+	 * @return number of set cells in row
+	 */
+	public int countRow (int rowIndex)
+	{
+		return mMatrix.countRow (rowIndex);
+	}
+	
+	/**
+	 * @param rowIndex index of row to count
+	 * @param startIndex index to start counting at
+	 * @param stopIndex index to stop counting at
+	 * @return number of set cells in row
+	 */
+	public int countRowPart (int rowIndex, int startIndex, int stopIndex)
+	{
+		return mMatrix.countRowPart (rowIndex, startIndex, stopIndex);
+	}
+	
+	/**
+	 * @param colIndex index of column to count
+	 * @return number of set cells in column
+	 */
+	public int countCol (int colIndex)
+	{
+		return mMatrix.countCol (colIndex);
+	}
+	
+	/**
+	 * @param colIndex index of column to count
+	 * @param startIndex index to start counting at
+	 * @param stopIndex index to stop counting at
+	 * @return number of set cells in column
+	 */
+	public int countColPart (int colIndex, int startIndex, int stopIndex)
+	{
+		return mMatrix.countColPart(colIndex, startIndex, stopIndex);
+	}
+	
+	
 	public boolean equals (Board compare)
 	{
 		return (this.mMatrix.equals(compare.mMatrix));	

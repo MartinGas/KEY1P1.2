@@ -73,6 +73,70 @@ public class MatrixHandler {
 		
 		return -1;
 	}
+	
+	/**
+	 * @param rowIndex index of row to count
+	 * @return Number of set cells in rowIndex
+	 */
+	public int countRow (int rowIndex)
+	{
+		int cnt = 0;
+		for (int cCol = 0; cCol < getWidth(); ++cCol)
+		{
+			if (getCell(cCol, rowIndex) != 0)
+				++cnt;
+		}
+		return cnt;
+	}
+	
+	/**
+	 * @param index of row to count
+	 * @param startIndex  index to start counting at
+	 * @param stopIndex index to stop counting at
+	 * @return number of set cells in row in given interval
+	 */
+	public int countRowPart (int rowIndex, int startIndex, int stopIndex)
+	{
+		int cnt = 0;
+		for (int cCol = startIndex; cCol <= stopIndex; ++cCol)
+		{
+			if (getCell(cCol, rowIndex) != 0)
+				++cnt;
+		}
+		return cnt;
+	}
+	
+	/**
+	 * @param colIndex index of column to count
+	 * @return Number of set cells in colIndex
+	 */
+	public int countCol (int colIndex)
+	{
+		int cnt = 0;
+		for (int cRow = 0; cRow < getWidth(); ++cRow)
+		{
+			if (getCell (colIndex, cRow) != 0)
+				++cnt;
+		}
+		return cnt;
+	}
+	
+	/**
+	 * @param colIndex index of column to count
+	 * @param startIndex  index to start counting at
+	 * @param stopIndex index to stop counting at
+	 * @return Number of set cells in colIndex
+	 */
+	public int countColPart (int colIndex, int startIndex, int stopIndex)
+	{
+		int cnt = 0;
+		for (int cRow = startIndex; cRow < stopIndex; ++cRow)
+		{
+			if (getCell (colIndex, cRow) != 0)
+				++cnt;
+		}
+		return cnt;
+	}
 
 	/**
 	 * @param row Index of the row

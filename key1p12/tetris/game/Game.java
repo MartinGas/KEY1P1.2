@@ -8,6 +8,22 @@ import java.util.Random;
 
 public class Game
 {
+	
+	public static Direction getDirectionFromMove (GameMove m)
+	{
+		switch (m)
+		{
+		case MLEFT: return Direction.LEFT;
+		case MRIGHT: return Direction.RIGHT;
+		case TURN: return Direction.RIGHT;
+		case FALL: return Direction.DOWN;
+		default: return Direction.NONE;
+		}
+	}
+	
+	public static boolean DEBUG = false;
+	public static long mFALL_TIME = 500, mPLACE_TIME = 50;
+	
 	public static class SimulGame implements Cloneable
 	{
 		@SuppressWarnings("serial")
@@ -45,17 +61,22 @@ public class Game
 		
 		public ArrayList <Pentomino> getBlocks()
 		{
-			return mGame.blocks;
+			return (ArrayList <Pentomino>)mGame.blocks.clone();
 		}
 		
 		public Pentomino getUsedPent()
 		{
-			return mGame.pentUsed;
+			return mGame.pentUsed.clone();
 		}
 		
 		public Score getCurrScore()
 		{
 			return mGame.getCurrScore();
+		}
+		
+		public Position getPentPosition()
+		{
+			return mGame.pentPosition.clone();
 		}
 		
 		public int getLastScoreDifference()
@@ -98,9 +119,61 @@ public class Game
 			return mGame.getWidth();
 		}
 		
+		/**
+		 * @param rowIndex index of row to count
+		 * @return number of set cells in row
+		 */
+		public int countRow (int rowIndex)
+		{
+			return mGame.countRow (rowIndex);
+		}
+		
+		/**
+		 * @param rowIndex index of row to count
+		 * @param startIndex index to start counting at
+		 * @param stopIndex index to stop counting at
+		 * @return number of set cells in row
+		 */
+		public int countRowPart (int rowIndex, int startIndex, int stopIndex)
+		{
+			return mGame.countRowPart (rowIndex, startIndex, stopIndex);
+		}
+		
+		/**
+		 * @param colIndex index of column to count
+		 * @return number of set cells in column
+		 */
+		public int countCol (int colIndex)
+		{
+			return mGame.countCol (colIndex);
+		}
+		
+		/**
+		 * @param colIndex index of column to count
+		 * @param startIndex index to start counting at
+		 * @param stopIndex index to stop counting at
+		 * @return number of set cells in column
+		 */
+		public int countColPart (int colIndex, int startIndex, int stopIndex)
+		{
+			return mGame.countColPart(colIndex, startIndex, stopIndex);
+		}
+		
 		public int getFilledHeight (int col)
 		{
 			return mGame.getFilledHeight (col);
+		}
+		
+		public boolean isGameMovePossible (GameMove m)
+		{
+			switch (m)
+			{
+			case MLEFT: case MRIGHT:
+				return checkMove (Game.getDirectionFromMove(m));
+			case TURN: 
+				return checkRotate (Game.getDirectionFromMove (m));
+			default: return true;
+			}
 		}
 		
 		public boolean checkMove (Direction d)
@@ -154,11 +227,6 @@ public class Game
 		private int mDeltaScore;
 	}
 	
-	public static boolean DEBUG = false;
-	
-	//suggestion: use classes implementing interface to set, store and modify timer
-	//add to pending changes file, once it exists
-	public static long mFALL_TIME = 1000, mPLACE_TIME = 250;
 	//Constructors
 	public Game(Board initBoard, ArrayList<Pentomino> pieces, Player player, HScore currentHScores)
 	{
@@ -288,6 +356,46 @@ public class Game
 			return (getHeight() - 1);
 		else 
 			return (closeIndex - 1);
+	}
+	
+	/**
+	 * @param rowIndex index of row to count
+	 * @return number of set cells in row
+	 */
+	public int countRow (int rowIndex)
+	{
+		return field.countRow (rowIndex);
+	}
+	
+	/**
+	 * @param rowIndex index of row to count
+	 * @param startIndex index to start counting at
+	 * @param stopIndex index to stop counting at
+	 * @return number of set cells in row
+	 */
+	public int countRowPart (int rowIndex, int startIndex, int stopIndex)
+	{
+		return field.countRowPart (rowIndex, startIndex, stopIndex);
+	}
+	
+	/**
+	 * @param colIndex index of column to count
+	 * @return number of set cells in column
+	 */
+	public int countCol (int colIndex)
+	{
+		return field.countCol (colIndex);
+	}
+	
+	/**
+	 * @param colIndex index of column to count
+	 * @param startIndex index to start counting at
+	 * @param stopIndex index to stop counting at
+	 * @return number of set cells in column
+	 */
+	public int countColPart (int colIndex, int startIndex, int stopIndex)
+	{
+		return field.countColPart(colIndex, startIndex, stopIndex);
 	}
 	
 	/**
