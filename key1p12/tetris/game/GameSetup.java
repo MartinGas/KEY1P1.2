@@ -54,6 +54,8 @@ public class GameSetup
 			Player p = mPlayerFax.producePlayer();
 			Game g = new Game (mBoard, mBlocks, p, mHighScore);
 			ArrayList <IGameListener> gameListeners = mPlayerFax.produceListeners (p);
+			for (IGameListener igl : gameListeners)
+				g.addListener (igl);
 			return g;
 		}
 		catch (NullPointerException npe)

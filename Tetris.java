@@ -232,6 +232,7 @@ public class Tetris
 		//create board
 		Board gameBoard = new Board (setup.getInputWidth(), setup.getInputHeight());
 		//create pentominoes
+		//ArrayList <Pentomino> pentsToUse = Pentomino.createsPentList();
 		ArrayList <Pentomino> pentsToUse = Pentomino.createsPentList();
 		//create game
 		mGame = new Game(gameBoard, pentsToUse, player, mHSList);

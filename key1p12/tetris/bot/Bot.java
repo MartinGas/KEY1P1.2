@@ -7,6 +7,8 @@ import java.io.*;
 import java.util.LinkedList;
 import java.util.ArrayList;
 
+import javax.management.ImmutableDescriptor;
+
 //abstract class every bot should inherit from
 public abstract class Bot implements Player
 {	
@@ -22,7 +24,7 @@ public abstract class Bot implements Player
 		@Override
 		public boolean isSensitive (GameAction event) 
 		{
-			if (event == GameAction.PICK || event == GameAction.RESUME)
+			if (event == GameAction.PICK || event == GameAction.RESUME || event == GameAction.MOVE)
 				return true;
 			return false;
 		}
@@ -35,12 +37,28 @@ public abstract class Bot implements Player
 		@Override
 		public void performAction(Game state, GameAction event) 
 		{
-			if (event == GameAction.PICK)
+			if (event == GameAction.PICK || event == GameAction.RESUME)
 			{
 				Bot.this.update(new Game.SimulGame(state));
-				
 			}
+			else
+				Bot.this.react (new Game.SimulGame (state));
 		}
+	}
+	
+	/**
+	 * constructor: initializes name, performance measure, ideal move column
+	 * @param pMeasure desired performance measure the bot should use
+	 * @throws FileNotFoundException
+	 */
+	public Bot (ArrayList <PerfMeasure> pMeasures, ArrayList <Double> weights, String name) throws FileNotFoundException
+	{
+		assert (pMeasures.size() == weights.size());
+		mPMeasures = pMeasures;
+		mPMeasureWeights = (ArrayList<Double>) weights.clone();
+		mName = name;
+		mIdealMove = null;
+		mIdealNextMove = GameMove.NONE;
 	}
 	
 	/**
@@ -57,6 +75,7 @@ public abstract class Bot implements Player
 		NameGenerator chooseName = new NameGenerator (nameBase);
 		mName = "Bot" + chooseName.getName();
 		mIdealMove = null;
+		mIdealNextMove = GameMove.NONE;
 	}
 	
 	/**
@@ -89,18 +108,52 @@ public abstract class Bot implements Player
 	 */
 	public GameMove getMove()
 	{
-		if (mIdealMove == null || mIdealMove.isEmpty())
+		assert (mIdealNextMove != null);
+		if (mIdealNextMove == GameMove.WAIT)
 		{
-			if (DEBUG)
-				System.out.println ("Bot returns move " + GameMove.NONE);
-			return GameMove.NONE;
+			System.out.println ("Waiting to move pent to the " + mIdealMove.getMove());
 		}
-		GameMove nextMove = mIdealMove.getMove();
-		mIdealMove.eraseHead();
-		if (DEBUG)
-			System.out.println ("Bot returns move " + nextMove);
-		return nextMove;
 		
+		GameMove exec = GameMove.NONE;
+		//consume stored move if actual move is stored
+		if (mIdealNextMove != GameMove.WAIT && mIdealNextMove != GameMove.NONE)
+		{
+			exec = mIdealNextMove;
+			//reset => react gets next move from queue
+			mIdealNextMove = GameMove.NONE;
+		}
+		
+		if (DEBUG)
+			System.out.println ("Bot returns move " + exec);
+		return exec;
+	}
+	
+	/**
+	 * Perform calculation deciding whether to execute next move in queue
+	 * @param state game state
+	 */
+	public void react (Game.SimulGame state)
+	{
+		if (mIdealNextMove == GameMove.WAIT)
+		{
+			//Decide whether wait is over == move following wait
+			if (!state.isGameMovePossible (mIdealMove.getMove()))
+				mIdealNextMove = GameMove.NONE;
+		}
+		if (mIdealNextMove != GameMove.WAIT)
+		{
+			//Decide whether to execute move next turn
+			if (mIdealNextMove == GameMove.NONE && 
+				!mIdealMove.isEmpty() &&
+				state.isGameMovePossible (mIdealMove.getMove()))
+			{
+				//if move possible: execute
+				mIdealNextMove = mIdealMove.getMove();
+				mIdealMove.eraseHead();
+			}
+			
+		}
+			
 	}
 	
 	//protected section
@@ -146,7 +199,7 @@ public abstract class Bot implements Player
 		 */
 		public InstructionSet (InstructionSet origin, GameMove move)
 		{
-			assert (move == GameMove.MRIGHT || move == GameMove.MLEFT || move == GameMove.TURN);
+			assert (move == GameMove.MRIGHT || move == GameMove.MLEFT || move == GameMove.TURN || move == GameMove.WAIT);
 			assert (!origin.moveExecuted());
 			mMoveQueue = new LinkedList <GameMove> (origin.mMoveQueue);
 			mMoveQueue.add (move);
@@ -164,6 +217,7 @@ public abstract class Bot implements Player
 			case TURN: 	mState.pentRotate(); 
 						--mRemainRotations;
 						break;
+			case WAIT:	break;
 			default: break;
 			}
 			mPScore = 0;
@@ -205,6 +259,24 @@ public abstract class Bot implements Player
 		{
 			assert (!isEmpty());
 			mMoveQueue.removeFirst();
+		}
+		
+		/**
+		 * Creates instruction sets containing wait instructions 
+		 * @return all branches of this instruction set
+		 */
+		public ArrayList <InstructionSet> getBranches (Direction d)
+		{
+			ArrayList <InstructionSet> branches = new ArrayList <InstructionSet>();
+			if (canWait (d))
+			{
+				InstructionSet branch = new InstructionSet (this, d);
+				//ArrayList <InstructionSet> sub = branch.getBranches (d);
+				branches.add (branch);
+				//branches.addAll (sub);
+			}
+			
+			return branches;
 		}
 		
 		/**
@@ -281,6 +353,92 @@ public abstract class Bot implements Player
 			return (mRemainRotations  <= 0);
 		}
 		
+		/**
+		 * @param d direction for wait move
+		 * @return true if there is a place in the adjacent column in d where the pentomino cannot be moved by dropping (cave)
+		 */
+		public boolean canWait (Direction d)
+		{
+			assert (d == Direction.RIGHT || d == Direction.LEFT);
+			
+			Position pentPos = mState.getPentPosition();
+			//if wait for move left
+			if (d == Direction.LEFT && pentPos.getX() > 0)
+			{
+				int pentLeftSideHeight = mState.getUsedPent().countRow (0);
+				int firstFilledIndex = mState.getFilledHeight (pentPos.getX() - 1) + 1;
+				int caveHeight = mState.getHeight() - firstFilledIndex - mState.countColPart(pentPos.getX() - 1, firstFilledIndex, mState.getHeight() - 1);
+				if (pentLeftSideHeight <= caveHeight)
+					return true;
+			}
+			
+			//if wait for move right
+			if (d == Direction.LEFT && pentPos.getX() < mState.getWidth() - 1)
+			{
+				int pentLeftSideHeight = mState.getUsedPent().countRow (mState.getUsedPent().getWidth() - 1);
+				int firstFilledIndex = mState.getFilledHeight (pentPos.getX() + 1) + 1;
+				int caveHeight = mState.getHeight() - firstFilledIndex - mState.countColPart(pentPos.getX() + 1, firstFilledIndex, mState.getHeight() - 1);
+				if (pentLeftSideHeight <= caveHeight)
+					return true;
+			}
+				
+			return false;
+		}
+		
+		/**
+		 * Wait constructor
+		 * @param origin instruction set to add wait to
+		 * @param waitDir direction to move after wait
+		 */
+		private InstructionSet (InstructionSet origin, Direction waitDir)
+		{
+			this (origin, GameMove.WAIT);
+			assert (waitDir == Direction.LEFT || waitDir == Direction.RIGHT);
+			
+			doWait (waitDir);
+			switch (waitDir)
+			{
+			case LEFT: mMoveQueue.add (GameMove.MLEFT);
+			break;
+			case RIGHT: mMoveQueue.add (GameMove.MRIGHT);
+			break;
+			}
+		}
+		
+		/**
+		 * moves pent until move in d is blocked, then moves until move in d is not blocked anymore
+		 * @param d direction for wait move
+		 */
+		private void doWait (Direction d)
+		{
+			//fall at least once
+			//fall while move in d is possible
+			boolean fell = false;
+			do
+			{
+				if (mState.checkMove (Direction.DOWN))
+				{
+					fell = true;
+					mState.move (Direction.DOWN);
+				}
+			}while (mState.checkMove (Direction.DOWN) && mState.checkMove (d));
+			
+			if (fell)
+			{
+				//fall while move in d is blocked and fall is possible
+				do
+				{
+					mState.move (Direction.DOWN);
+				}while (mState.checkMove (Direction.DOWN) && !mState.checkMove (d));
+				
+				//if move in d is possible: move as long as possible
+				while (mState.checkMove (d))
+				{
+					mState.move (d);
+				}
+			}
+		}
+		
 		private LinkedList <GameMove> mMoveQueue;
 		private Game.SimulGame mState;
 		private Direction mMoveDirection;
@@ -306,4 +464,5 @@ public abstract class Bot implements Player
 	private ArrayList <Double> mPMeasureWeights;
 	private String mName;
 	private InstructionSet mIdealMove;
+	private GameMove mIdealNextMove;
 }
