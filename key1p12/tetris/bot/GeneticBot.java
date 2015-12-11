@@ -27,6 +27,7 @@ public class GeneticBot extends Bot
 		mSearchDepth = searchDepth;
 		mEvoCycles = evoCycles;
 		mMutProb = mutationProb;
+		mRandGen = new Random (System.currentTimeMillis());
 	}
 
 	/**
@@ -35,23 +36,25 @@ public class GeneticBot extends Bot
 	 */
 	public void update(SimulGame state) 
 	{
+		if (DEBUG)
+			System.out.println ("Updating genetic bot");
+		InstructionSet origin = new InstructionSet(state);
 		//generate starting population of subsequent moves
-		LinkedList <ArrayList <InstructionSet>> pop = genPopulation (new InstructionSet (state), mSearchDepth, mPopSize);
+		LinkedList <ArrayList <InstructionSet>> pop = genPopulation (origin, mSearchDepth, mPopSize);
 		//for numberOfIterations
 		for (int cEvo = 0; cEvo < mEvoCycles; cEvo++)
 		{
+			produceOffspring (origin, pop);
 			//kill weak ones
 			selectPop (pop, mPopSize);
-			//mutate remaining ones
-			mutatePop (new InstructionSet (state), pop);
 		}
 			
 		//find best solution
-		int bestScore = Integer.MIN_VALUE;
+		double bestScore = Double.MIN_VALUE;
 		InstructionSet ideal = null;
 		for (ArrayList <InstructionSet> mem : pop)
 		{
-			int score = getPMeasure (mem);
+			double score = getPMeasure (mem);
 			if (score > bestScore)
 			{
 				bestScore = score;
@@ -60,6 +63,11 @@ public class GeneticBot extends Bot
 		}
 		//set move to ideal solution
 		setMove (ideal);
+		if (DEBUG)
+		{
+			System.out.println ("Best move ");
+			ideal.printQueue();
+		}
 	}
 	
 	/**
@@ -87,6 +95,8 @@ public class GeneticBot extends Bot
 			}
 			pop.add (newPopMember);
 		}
+		if (DEBUG)
+			System.out.println ("Population of size " + pop.size() + " generated");
 		
 		return pop;
 	}
@@ -97,13 +107,12 @@ public class GeneticBot extends Bot
 	 */
 	private InstructionSet genRandMoves (InstructionSet origin)
 	{
-		Random rand = new Random();
 		InstructionSet last = new InstructionSet (origin);
 		boolean done = false;
 		//add arbitrary number of moves
 		while (!done)
 		{
-			switch (rand.nextInt(4))
+			switch (mRandGen.nextInt(4))
 			{
 			case 0: done = true;
 			break;
@@ -118,6 +127,11 @@ public class GeneticBot extends Bot
 			break;
 			}
 		}
+		if (DEBUG)
+		{
+			System.out.println ("Generated new instruction set ");
+			last.printQueue();
+		}
 		return last;
 	}
 	
@@ -125,11 +139,17 @@ public class GeneticBot extends Bot
 	 * @param comp InstructionSet to evaluate
 	 * @return performance value
 	 */
-	private int getPMeasure (ArrayList <InstructionSet> comp)
+	private double getPMeasure (ArrayList <InstructionSet> comp)
 	{
-		int score = 0;
+		//TODO does not work
+		//TODO need to consider every following state
+		double score = 0;
+		for (int cDepth = 1; cDepth < comp.size(); ++cDepth)
+		{
+		}
 		for (InstructionSet ins : comp)
 			score += ins.getPMeasure();
+		
 		return score;
 	}
 	
@@ -140,71 +160,93 @@ public class GeneticBot extends Bot
 	 */
 	private void selectPop (LinkedList <ArrayList <InstructionSet>> pop, int survivors)
 	{
+		if (DEBUG)
+			System.out.println ("Selection start " + pop.size() + " individuals");
 		//stores amount <survivors> best scores
-		LinkedList <Integer> bestScores  = new LinkedList <Integer>();
+		LinkedList <Double> bestScores  = new LinkedList <Double>();
 		//determine best scores by iterating through population
 		for (ArrayList <InstructionSet> member : pop)
 		{
 			//compute best score of current member
-			int score = getPMeasure (member);
-			ListIterator <Integer> findPos = bestScores.listIterator();
+			double score = getPMeasure (member);
+			ListIterator <Double> findPos = bestScores.listIterator();
 			//find place in list
-			while (findPos.hasNext() && findPos.next().compareTo (new Integer (score)) > 0) {}
+			while (findPos.hasNext() && findPos.next().compareTo (new Double (score)) > 0) {}
 			//if not at end of list: insert & remove last if necessary
 			if (findPos.hasNext())
 			{
-				findPos.add (new Integer (score));
+				findPos.add (new Double (score));
 				if (bestScores.size() > survivors)
 					bestScores.removeLast();
 			}
 			//store if at end and size is inferior to maximum size
 			else if (bestScores.size() < survivors)
-				bestScores.add (new Integer (score));
+				bestScores.add (new Double (score));
 		}
 		//eliminate members having performance values less than weakest survivor
 		ListIterator <ArrayList <InstructionSet>> findElim = pop.listIterator();
 		while (findElim.hasNext())
 		{
-			int score = getPMeasure(findElim.next());
-			if (bestScores.getLast().compareTo (new Integer (score)) >= 0)
+			double score = getPMeasure(findElim.next());
+			int comparison = bestScores.getLast().compareTo (new Double (score));
+			if (pop.size() > mPopSize && comparison >= 0 || pop.size() <= mPopSize && comparison > 0)
 				findElim.remove();
 		}
+		if (DEBUG)
+			System.out.println ("Selection end " + pop.size() + " individuals");
 	}
 	
-	/**
-	 * Generate mutations of population
-	 * @param origin current state
-	 * @param pop population
-	 */
-	private void mutatePop (InstructionSet origin, LinkedList <ArrayList <InstructionSet>> pop)
+	private void produceOffspring (InstructionSet origin, LinkedList <ArrayList <InstructionSet>> pop)
 	{
-		Random rand = new Random();
-		//iterate through population
-		ListIterator <ArrayList <InstructionSet>> iList = pop.listIterator();
-		while (iList.hasNext())
+		if (DEBUG)
+			System.out.println ("Recombination start " + pop.size() + " individuals");
+		ArrayList <ArrayList <InstructionSet>> offspring = new ArrayList<ArrayList<InstructionSet>>();
+		for (int cPop = 0; cPop < pop.size(); ++cPop)
 		{
-			//if random
-			if (rand.nextDouble() <= mMutProb)
+			int iMate = mRandGen.nextInt (pop.size());
+			if (iMate != cPop)
 			{
-				ArrayList <InstructionSet> mutate = (ArrayList<InstructionSet>) iList.next().clone();
-				//determine which move will be recomputed => "mutated"
-				int mutMove = rand.nextInt (mutate.size());
-				InstructionSet prevMove = null;
-				if (mutMove == 0)
-					prevMove = origin;
-				else
-					prevMove = mutate.get (mutMove - 1);
-				//compute mutated move, insert into sequence
-				mutate.set (mutMove, genRandMoves (prevMove));
-				mutate.get(mutMove).doMove();
-				//add mutated child to beginning of population (=> prevent repeated mutation!)
-				pop.addFirst (mutate);
+				ArrayList <InstructionSet> child = recombine (pop.get(cPop), pop.get(iMate));
+				mutateIndividual (origin, child);
+				offspring.add(child);
 			}
+		}
+		pop.addAll(offspring);
+		if (DEBUG)
+			System.out.println ("Recombination end " + pop.size() + " individuals");
+	}
+	
+	private void mutateIndividual (InstructionSet origin, ArrayList <InstructionSet> i)
+	{
+		if (mRandGen.nextDouble() <= mMutProb)
+		{
+			int mutMove = mRandGen.nextInt (i.size());
+			InstructionSet previous = null;
+			if (mutMove == 0)
+				previous = origin;
 			else
-				iList.next();
+				previous = i.get(mutMove - 1);
+
+			InstructionSet mutatedGene = genRandMoves(previous);
+			mutatedGene.doMove();
+			i.set(mutMove, mutatedGene);
 		}
 	}
 	
+	private ArrayList <InstructionSet> recombine (ArrayList <InstructionSet> p1, ArrayList<InstructionSet> p2)
+	{
+		ArrayList <InstructionSet> child = new ArrayList<InstructionSet>();
+		for (int cGenes = 0; cGenes < p1.size() && cGenes < p2.size(); ++cGenes)
+		{
+			if (cGenes % 2 == 0)
+				child.add (p1.get(cGenes).clone());
+			else
+				child.add (p2.get(cGenes).clone());
+		}
+		return child;
+	}
+	
+	private Random mRandGen;
 	private int mPopSize, mSearchDepth, mEvoCycles;
 	private double mMutProb;
 }

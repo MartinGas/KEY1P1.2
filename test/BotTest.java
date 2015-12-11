@@ -24,11 +24,10 @@ public class BotTest implements Runnable
 	
 	/**
 	 * @param args
+	 * @throws IOException 
 	 */
-	public static void main(String[] args)
-	{
-		botWaitTest(); return;
-		/*
+	public static void main(String[] args) throws IOException
+	{	
 		int maxShapeHeight = 5;
 		HScore hsList = null;
 		ScoreCountable scoreComp = new ExponentialScore (2, 1, 1);
@@ -49,40 +48,118 @@ public class BotTest implements Runnable
 			return;
 		}
 		
+		PerfMeasureFactory pmFax = new PerfMeasureFactory();
+		pmFax.setMaxScore ((int) scoreComp.calculateScore(maxShapeHeight));
+		pmFax.setTolerance(maxShapeHeight - 2);
 		
 		ArrayList <PerfMeasure> pMeasures = new ArrayList<PerfMeasure>();
-		pMeasures.add (new ScorePerformance (scoreComp.calculateScore (maxShapeHeight)));
-		pMeasures.add (new HeightDiffPerformance (maxShapeHeight - 1));
-		pMeasures.add (new DensityPerformance());
-		ArrayList <Double> pmWeights = new ArrayList<Double>();
-		pmWeights.add (new Double (25.0));
-		pmWeights.add (new Double (1.2));
-		pmWeights.add (new Double (1.0));
-		PlayerFactory pFax = new GreedyBotFactory (pMeasures, pmWeights, new File ("nameDataBase.txt"));
+		pMeasures.add (pmFax.getPMeasure (PerfMeasureType.SCORE));
+		pMeasures.add (pmFax.getPMeasure (PerfMeasureType.HEIGHTDIFFERENCE));
+		pMeasures.add (pmFax.getPMeasure (PerfMeasureType.DENSITY));
+		pMeasures.add (pmFax.getPMeasure (PerfMeasureType.ISOLATED));
+		pMeasures.add (pmFax.getPMeasure (PerfMeasureType.RECTANGLE));
+		String measuresUsed = "Score/HDiff/Density/Isolated/Rect";
 		
-		GameSetup setup = new GameSetup ("test");
-		setup.loadBlocks(Pentomino.createsPentList());
-		setup.loadBoard (new Board (10, 15));
-		setup.loadHighScore (hsList);
-		setup.loadPlayerFactory(pFax);
+		ArrayList <double[]> weightList = generateWeightPermutations(new double[pMeasures.size()], 0, 1.0, 0.2);
 		
-		Thread t = null;
-		try
+		int testRuns = 2;
+		File testResultFile = new File ("TestResults.csv");
+		generateExportFile(testResultFile, testRuns);
+		int processCounter = 0;
+		
+		for (int cWeight = 0; cWeight < weightList.size(); ++cWeight)
 		{
-			BotTest testing = new BotTest (setup, 10);
-			t = new Thread (testing);
-			t.setDaemon(true);
-			t.start();
-			t.join();
-			testing.exportToCvs (new File ("testingTest.csv"));
+			ArrayList <Thread> threads = new ArrayList <Thread>();
+			ArrayList <BotTest> parallelTests = new ArrayList<BotTest>();
+			for (int cThread = 0; cThread < 16 && cWeight < weightList.size(); ++cThread, ++cWeight)
+			{
+				ArrayList <Double> weights = new ArrayList <Double> ();
+				String setupMessage = measuresUsed + " ";
+				for (double w : weightList.get(cWeight))
+				{
+					weights.add (w);
+					setupMessage = setupMessage + w + "/";
+				}
+				PlayerFactory pFax = new GreedyBotFactory (pMeasures, weights, new File ("nameDataBase.txt"));
+				
+				GameSetup setup = new GameSetup (setupMessage);
+				setup.loadBlocks(Pentomino.createsPentList());
+				setup.loadBoard (new Board (10, 15));
+				setup.loadHighScore (hsList);
+				setup.loadPlayerFactory(pFax);
+				
+				try
+				{
+					BotTest testing = new BotTest (setup, testRuns);
+					parallelTests.add (testing);
+					Thread t = new Thread (testing);
+					threads.add(t);
+					t.start();
+				}
+				catch (Exception e)
+				{
+					System.out.println ("Something went wrong while testing");
+					System.out.println (e.getMessage());
+					e.printStackTrace();
+					return;
+				}
+			}
+			
+			for (int cThread = 0; cThread < threads.size(); ++cThread)
+			{
+				try
+				{
+					threads.get (cThread).join();
+
+					parallelTests.get(cThread).exportToCvs (testResultFile);
+					
+					++processCounter;
+					System.out.println ("Process " + processCounter + " is done");
+					
+				}
+				catch (InterruptedException ie)
+				{
+					System.out.println ("Thread was interrupted, test is gone");
+					System.out.println (ie.getMessage());
+					ie.printStackTrace();
+				}
+				catch (BadFormatExc bfe)
+				{
+					System.out.println ("CSV file has bad format");
+					System.out.println (bfe.getMessage());
+					bfe.printStackTrace();
+				}
+				catch (IOException ioe)
+				{
+					System.out.println ("Could not load/read/write properly");
+					System.out.println (ioe.getMessage());
+					ioe.printStackTrace();
+				}
+				
+			}
 		}
-		catch (Exception e)
+	}
+	
+	public static ArrayList <double[]> generateWeightPermutations (double[] weights, int position, double remain, double delta)
+	{
+		assert (position >= 0 && position < weights.length);
+		ArrayList <double[]> storage = new ArrayList<double[]>();
+		if (position < weights.length - 1)
 		{
-			System.out.println ("Something went wrong while testing");
-			System.out.println (e.getMessage());
-			e.printStackTrace();
-			return;
-		}*/
+			for (double cRemain = remain; cRemain >= 0; cRemain -= delta)
+			{
+				weights[position] = cRemain;
+				double[] copyWeights = new double[weights.length];
+				System.arraycopy(weights, 0, copyWeights, 0, weights.length);
+				storage.addAll (generateWeightPermutations (copyWeights, position + 1, remain - cRemain, delta));
+			}
+		}
+		else
+		{
+			weights[position] = remain;
+			storage.add (weights);
+		}
+		return storage;
 	}
 	
 	public static void botWaitTest()
@@ -191,7 +268,7 @@ public class BotTest implements Runnable
 		}
 	}
 	
-	public static final int PLACE_DELAY = 50, FALL_DELAY = 100;
+	public static final int PLACE_DELAY = 20, FALL_DELAY = 100;
 	
 	public BotTest (GameSetup setup, int repetitions)
 	{
@@ -209,13 +286,11 @@ public class BotTest implements Runnable
 		for (int cRep = 0; cRep < mRepetitions; ++cRep)
 		{
 			Game game = mSetup.construct();
-			game.debugPrint();
 			System.out.println();
 			
 			while (!game.isGameOver())
 				game.play();
 			scores.add ((int) game.getCurrScore().getScore());
-			game.debugPrint();
 		}
 	}
 	

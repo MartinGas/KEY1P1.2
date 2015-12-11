@@ -134,24 +134,27 @@ public abstract class Bot implements Player
 	 */
 	public void react (Game.SimulGame state)
 	{
-		if (mIdealNextMove == GameMove.WAIT)
+		if (mIdealMove != null)
 		{
-			//Decide whether wait is over == move following wait
-			if (!state.isGameMovePossible (mIdealMove.getMove()))
-				mIdealNextMove = GameMove.NONE;
-		}
-		if (mIdealNextMove != GameMove.WAIT)
-		{
-			//Decide whether to execute move next turn
-			if (mIdealNextMove == GameMove.NONE && 
-				!mIdealMove.isEmpty() &&
-				state.isGameMovePossible (mIdealMove.getMove()))
+			if (mIdealNextMove == GameMove.WAIT)
 			{
-				//if move possible: execute
-				mIdealNextMove = mIdealMove.getMove();
-				mIdealMove.eraseHead();
+				//Decide whether wait is over == move following wait
+				if (!state.isGameMovePossible (mIdealMove.getMove()))
+					mIdealNextMove = GameMove.NONE;
 			}
-			
+			if (mIdealNextMove != GameMove.WAIT)
+			{
+				//Decide whether to execute move next turn
+				if (mIdealNextMove == GameMove.NONE && 
+					!mIdealMove.isEmpty() &&
+					state.isGameMovePossible (mIdealMove.getMove()))
+				{
+					//if move possible: execute
+					mIdealNextMove = mIdealMove.getMove();
+					mIdealMove.eraseHead();
+				}
+				
+			}
 		}
 			
 	}
@@ -184,7 +187,7 @@ public abstract class Bot implements Player
 		public InstructionSet (InstructionSet lastGen)
 		{
 			mMoveQueue = new LinkedList <GameMove> ();
-			assert (lastGen.moveExecuted()):
+			//assert (lastGen.moveExecuted()):
 			mState = lastGen.mState.clone();
 			mMoveDirection = Direction.NONE;
 			mRemainRotations = Pentomino.generateRotations (lastGen.mState.getUsedPent()).size() - 1;
@@ -224,11 +227,38 @@ public abstract class Bot implements Player
 			mMoveOccurred = false;
 		}
 		
+		//hacked constructor for tree structure
+		/**
+		 * Clones this
+		 */
+		public InstructionSet clone()
+		{
+			InstructionSet clone = new InstructionSet (this);
+			clone.mMoveQueue = (LinkedList <GameMove>)this.mMoveQueue;
+			clone.mMoveDirection = this.mMoveDirection;
+			clone.mRemainRotations = this.mRemainRotations;
+			clone.mPScore = this.mPScore;
+			clone.mMoveOccurred = this.mMoveOccurred;
+			return clone;
+		}
+		
+		/**
+		 * Generates array list of instruction sets based on this one
+		 * each using a different pentomino
+		 * @return
+		 */
 		public ArrayList <InstructionSet> getFollowUp()
 		{
 			ArrayList <InstructionSet> foUps = new ArrayList <InstructionSet>();
-			//TODO add game states containing all different pentominoes in current use
-			
+			if (moveExecuted())
+			{
+				int numberOfPents = mState.getBlocks().size();
+				for (int cPent = 0; cPent < numberOfPents; ++cPent)
+				{
+					InstructionSet follow = new InstructionSet(this);
+					follow.mState.pickPent(cPent);
+				}
+			}
 			return foUps;
 		}
 		
@@ -341,7 +371,7 @@ public abstract class Bot implements Player
 		 */
 		public boolean checkMoveCancel (Direction d)
 		{
-			return (d != mMoveDirection);
+			return (d != mMoveDirection && mMoveDirection != Direction.NONE);
 		}
 		
 		/**

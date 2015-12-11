@@ -295,7 +295,7 @@ public class Tetris
 							gameListeners.add (gb.new PickListener());
 							player = gb;
 							break;
-			case GENETIC:	GeneticBot genb = new GeneticBot(pms, weights, new File (nameBase), 0.1, 1000, 3, 10);
+			case GENETIC:	GeneticBot genb = new GeneticBot(pms, weights, new File (nameBase), 0.1, 1000, 2, 50);
 							gameListeners.add (genb.new PickListener());
 							player = genb;
 							break;

@@ -212,9 +212,8 @@ public class Game
 		public void fallPlace()
 		{
 			long scoreBefore = mGame.getCurrScore().getScore();
-			mGame.fallPlace(); 
-			mGame.rowClearer();
-			mDeltaScore = (int) (mGame.getCurrScore().getScore() - scoreBefore);
+			mGame.fallPlace();
+			int mDeltaScore = (int) (mGame.getCurrScore().getScore() - scoreBefore);
 		}
 		
 		public void pentPicker()
@@ -226,6 +225,7 @@ public class Game
 		{
 			assert (index >= 0 && index < mGame.blocks.size());
 			mGame.pentUsed = mGame.blocks.get (index).clone();
+			mGame.pentPosition = new Position ((mGame.getWidth() - mGame.pentUsed.getWidth()) / 2, 0);
 		}
 		
 		private Game mGame;
@@ -293,7 +293,7 @@ public class Game
 				if (mPlaceTimer.isStopped())
 				{
 					mPlaceTimer.start();
-					//if (DEBUG)
+					if (DEBUG)
 						System.out.println ("Start place timer " + mPlaceTimer.getElapsedTime());
 				}
 				//if place timer has elapsed
